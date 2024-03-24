@@ -1,4 +1,4 @@
-import { Agent } from '@/types';
+import { Agent } from '@/types/Agent';
 import { PropsWithChildren, useCallback, useMemo } from 'react';
 import { useMission } from './MissionProvider';
 import { doc, updateDoc } from 'firebase/firestore';

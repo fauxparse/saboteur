@@ -2,17 +2,12 @@ import { useAgent } from '@/contexts/AgentProvider';
 import { useMission } from '@/contexts/MissionProvider';
 import { ActionIcon, AppShell, Flex, Title } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { useEffect } from 'react';
 
 import classes from './Agent.module.css';
 
 export const App: React.FC = () => {
   const { mission } = useMission();
   const { agent, signOut } = useAgent();
-
-  useEffect(() => {
-    console.log(mission);
-  }, [mission]);
 
   return (
     <AppShell layout="alt" header={{ height: 72 }}>

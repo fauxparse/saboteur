@@ -21,7 +21,6 @@ export const Login: React.FC = () => {
       password: '',
     },
     onSubmit: ({ value: { email, password } }) => {
-      console.log(email, password);
       const auth = getAuth(app);
       setLoggingIn(true);
       setError(null);

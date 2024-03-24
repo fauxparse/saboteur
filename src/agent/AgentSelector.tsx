@@ -1,8 +1,7 @@
 import { AgentProvider } from '@/contexts/AgentProvider';
 import { useMission } from '@/contexts/MissionProvider';
 import { db } from '@/firebase';
-import { parseAgent } from '@/hooks/useAgents';
-import { Agent } from '@/types';
+import { Agent, parseAgent } from '@/types/Agent';
 import { Button, Card, Center, Stack, Title } from '@mantine/core';
 import { Outlet } from '@tanstack/react-router';
 import { User, getAuth, onAuthStateChanged } from 'firebase/auth';

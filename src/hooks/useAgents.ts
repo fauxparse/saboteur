@@ -1,33 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  DocumentSnapshot,
-  QueryDocumentSnapshot,
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  updateDoc,
-} from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
-import { Agent, COLORS, Mission } from '@/types';
-import { z } from 'zod';
+import { Agent, AgentFirebaseSchema, COLORS, parseAgent } from '@/types/Agent';
+import { Mission } from '@/types';
 import { sortBy } from 'lodash-es';
-
-export const AgentSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  userId: z.string().nullable().optional(),
-  color: z.enum(COLORS).optional(),
-});
-
-export const parseAgent = (doc: DocumentSnapshot | QueryDocumentSnapshot): Agent =>
-  AgentSchema.parse({ id: doc.id, ...doc.data() });
-
-export const AgentFirebaseSchema = z.object({
-  name: z.string().optional(),
-  color: z.enum(COLORS).optional(),
-});
 
 export const useAgents = (mission: Mission) => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -36,12 +12,7 @@ export const useAgents = (mission: Mission) => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(ref, (snapshot) => {
-      setAgents(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Agent[]
-      );
+      setAgents(snapshot.docs.map(parseAgent));
     });
 
     return unsubscribe;
@@ -66,11 +37,16 @@ export const useAgents = (mission: Mission) => {
 
   const deleteAgent = useCallback(
     async (agent: Agent) => {
-      console.log(doc(ref, agent.id));
       await deleteDoc(doc(ref, agent.id));
-      console.log('deleted', agent);
     },
     [ref]
+  );
+
+  const eliminateAgent = useCallback(
+    async (agent: Agent) => {
+      updateAgent({ id: agent.id, eliminatedAt: new Date() });
+    },
+    [updateAgent]
   );
 
   return {
@@ -78,5 +54,6 @@ export const useAgents = (mission: Mission) => {
     createAgent,
     updateAgent,
     deleteAgent,
+    eliminateAgent,
   };
 };

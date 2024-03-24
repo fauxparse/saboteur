@@ -32,10 +32,22 @@
 
 .milestoneIcon {
   grid-column: icon;
+
+  & button {
+    &:active {
+      transform: none;
+    }
+  }
 }
 
 .milestoneContent {
   grid-column: content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 40rem;
+  margin-block-start: -0.375rem;
+  min-height: 2.25rem;
 }
 
 .agentName {

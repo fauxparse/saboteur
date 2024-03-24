@@ -1,6 +1,6 @@
 import { useMission } from '@/contexts/MissionProvider';
 import { useAgents } from '@/hooks/useAgents';
-import { Agent, COLORS } from '@/types';
+import { Agent, COLORS } from '@/types/Agent';
 import {
   Box,
   Button,

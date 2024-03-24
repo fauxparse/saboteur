@@ -1,7 +1,14 @@
-import { Agent } from '@/types';
+import { Agent } from '@/types/Agent';
 import { Button, Menu } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconEdit, IconEyeglass2, IconTrash } from '@tabler/icons-react';
+import {
+  IconEdit,
+  IconEyeglass2,
+  IconGhost,
+  IconLego,
+  IconSlice,
+  IconTrash,
+} from '@tabler/icons-react';
 import { AgentInfo } from './AgentInfo';
 import { useMission } from '@/contexts/MissionProvider';
 import { useCallback } from 'react';
@@ -9,9 +16,16 @@ import { useCallback } from 'react';
 type AgentMenuProps = {
   agent: Agent;
   onDelete: (agent: Agent) => void;
+  onEliminate: (agent: Agent) => void;
+  onReinstate: (agent: Agent) => void;
 };
 
-export const AgentMenu: React.FC<AgentMenuProps> = ({ agent, onDelete }) => {
+export const AgentMenu: React.FC<AgentMenuProps> = ({
+  agent,
+  onDelete,
+  onEliminate,
+  onReinstate,
+}) => {
   const [editing, modal] = useDisclosure();
 
   const { mission, updateMission } = useMission();
@@ -31,8 +45,9 @@ export const AgentMenu: React.FC<AgentMenuProps> = ({ agent, onDelete }) => {
         <Menu.Target>
           <Button
             color={agent.color || undefined}
-            rightSection={isSaboteur ? <IconEyeglass2 /> : null}
-            justify="space-between"
+            leftSection={isSaboteur ? <IconEyeglass2 /> : <IconLego />}
+            justify="start"
+            variant={agent.eliminatedAt ? 'light' : 'filled'}
           >
             {agent.name}
           </Button>
@@ -41,6 +56,15 @@ export const AgentMenu: React.FC<AgentMenuProps> = ({ agent, onDelete }) => {
           <Menu.Item leftSection={<IconEyeglass2 />} onClick={setSaboteur}>
             Make Saboteur
           </Menu.Item>
+          {agent.eliminatedAt ? (
+            <Menu.Item leftSection={<IconGhost />} onClick={() => onReinstate(agent)}>
+              Reinstate
+            </Menu.Item>
+          ) : (
+            <Menu.Item leftSection={<IconSlice />} onClick={() => onEliminate(agent)}>
+              Eliminate
+            </Menu.Item>
+          )}
           <Menu.Divider />
           <Menu.Item leftSection={<IconEdit />} onClick={modal.open}>
             Edit details

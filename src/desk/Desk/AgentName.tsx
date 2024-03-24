@@ -1,4 +1,4 @@
-import { Agent } from '@/types';
+import { Agent } from '@/types/Agent';
 import { Badge, BadgeProps } from '@mantine/core';
 
 import classes from './Desk.module.css';
