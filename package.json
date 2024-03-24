@@ -12,7 +12,6 @@
   "dependencies": {
     "@mantine/core": "^7.6.2",
     "@mantine/hooks": "^7.6.2",
-    "@million/lint": "^0.0.73",
     "@tabler/icons-react": "^3.1.0",
     "@tanstack/react-form": "^0.16.0",
     "@tanstack/react-router": "^1.22.2",
