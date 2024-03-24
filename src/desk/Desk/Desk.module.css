@@ -1,4 +1,46 @@
+.shell {
+  font-variant-numeric: tabular-nums;
+}
+
 .header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: [full-start time-start] 1fr [time-end icon-start] auto [icon-end content-start] 3fr [content-end full-end];
+  column-gap: 1rem;
+  row-gap: 2rem;
+  padding: 2rem;
+}
+
+.milestone {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: full;
+  align-items: start;
+}
+
+.milestoneTime {
+  grid-column: time;
+  justify-self: end;
+  border: 0;
+  height: 1.5rem;
+}
+
+.milestoneIcon {
+  grid-column: icon;
+}
+
+.milestoneContent {
+  grid-column: content;
+}
+
+.agentName {
+  text-transform: none;
+  vertical-align: baseline;
+  font-size: 1rem;
+  font-weight: 500;
 }

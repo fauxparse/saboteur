@@ -1,12 +1,17 @@
-import { Desk } from '@/desk/Desk';
+import { MissionProvider } from '@/contexts/MissionProvider';
+import { App } from '@/desk/Desk/App';
 import { db } from '@/firebase';
-import { Mission } from '@/types';
+import { parseMission } from '@/hooks/useMissions';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { doc, getDoc } from 'firebase/firestore';
 
 const Component = () => {
   const { mission } = Route.useLoaderData();
-  return <Desk mission={mission} />;
+  return (
+    <MissionProvider mission={mission}>
+      <App />
+    </MissionProvider>
+  );
 };
 
 export const Route = createFileRoute('/desk/_authenticated/$missionId')({
@@ -19,10 +24,7 @@ export const Route = createFileRoute('/desk/_authenticated/$missionId')({
     }
 
     return {
-      mission: {
-        id: mission.id,
-        ...mission.data(),
-      } as Mission,
+      mission: parseMission(mission),
     };
   },
 });

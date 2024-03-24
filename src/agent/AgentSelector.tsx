@@ -3,7 +3,7 @@ import { useMission } from '@/contexts/MissionProvider';
 import { db } from '@/firebase';
 import { parseAgent } from '@/hooks/useAgents';
 import { Agent } from '@/types';
-import { Button, Center, List, Title } from '@mantine/core';
+import { Button, Card, Center, Stack, Title } from '@mantine/core';
 import { Outlet } from '@tanstack/react-router';
 import { User, getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
@@ -49,14 +49,23 @@ export const AgentSelector: React.FC = () => {
 
   return (
     <Center style={{ minHeight: '100svh', flexDirection: 'column' }}>
-      <Title>Identify yourself</Title>
-      <List>
-        {agents.map((agent) => (
-          <List.Item key={agent.id}>
-            <Button onClick={() => signIn(agent)}>{agent.name}</Button>
-          </List.Item>
-        ))}
-      </List>
+      <Card>
+        <Card.Section withBorder p="md">
+          <Title order={5} ff="mono" fw={500}>
+            {mission.id}
+          </Title>
+          <Title>Identify yourself</Title>
+        </Card.Section>
+        <Card.Section p="md">
+          <Stack align="stretch">
+            {agents.map((agent) => (
+              <Button size="lg" onClick={() => signIn(agent)}>
+                {agent.name}
+              </Button>
+            ))}
+          </Stack>
+        </Card.Section>
+      </Card>
     </Center>
   );
 };

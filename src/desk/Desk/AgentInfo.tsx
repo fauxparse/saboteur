@@ -1,35 +1,63 @@
 import { useMission } from '@/contexts/MissionProvider';
 import { useAgents } from '@/hooks/useAgents';
-import { Agent } from '@/types';
-import { Box, Button, Modal, ModalProps, Stack, TextInput } from '@mantine/core';
+import { Agent, COLORS } from '@/types';
+import {
+  Box,
+  Button,
+  ColorPicker,
+  Modal,
+  ModalProps,
+  Stack,
+  TextInput,
+  useMantineTheme,
+} from '@mantine/core';
 import { useForm } from '@tanstack/react-form';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 type AgentInfoProps = ModalProps & {
   agent: Agent;
 };
 
-export const AgentInfo: React.FC<AgentInfoProps> = ({ agent, onClose, ...props }) => {
+export const AgentInfo: React.FC<AgentInfoProps> = ({ agent, opened, onClose, ...props }) => {
   const { mission } = useMission();
-  const { createAgent } = useAgents(mission);
+  const { createAgent, updateAgent } = useAgents(mission);
   const [busy, setBusy] = useState(false);
+
+  const theme = useMantineTheme();
+
+  const swatches = useMemo(() => COLORS.map((c) => theme.colors[c][6]), [theme.colors]);
 
   const form = useForm({
     defaultValues: {
       name: agent.name,
+      color: (agent.id && String(agent.color)) || undefined,
     },
     onSubmit: async ({ value }) => {
       setBusy(true);
-      if (!agent.id) {
-        await createAgent(value.name);
+      if (agent.id) {
+        await updateAgent({ id: agent.id, ...value });
+      } else {
+        await createAgent(value as Partial<Agent>);
       }
       setBusy(false);
       onClose();
     },
   });
 
+  useEffect(() => {
+    if (opened) {
+      form.reset();
+    }
+  }, [opened, form]);
+
   return (
-    <Modal centered title={agent.id ? 'Edit agent' : 'New agent'} onClose={onClose} {...props}>
+    <Modal
+      centered
+      title={agent.id ? 'Edit agent' : 'New agent'}
+      opened={opened}
+      onClose={onClose}
+      {...props}
+    >
       <Box
         component="form"
         display="contents"
@@ -52,9 +80,25 @@ export const AgentInfo: React.FC<AgentInfoProps> = ({ agent, onClose, ...props }
                 />
               )}
             />
-            <Button type="submit" loading={busy}>
-              Save
-            </Button>
+            <form.Field
+              name="color"
+              children={(field) => (
+                <>
+                  <ColorPicker
+                    withPicker={false}
+                    swatches={swatches}
+                    value={field.state.value}
+                    onChange={(v) => {
+                      const color = COLORS[swatches.indexOf(v)];
+                      field.handleChange(color);
+                    }}
+                  />
+                  <Button color={field.state.value} type="submit" loading={busy}>
+                    Save
+                  </Button>
+                </>
+              )}
+            />
           </Stack>
         </Box>
       </Box>

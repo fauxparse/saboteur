@@ -1,4 +1,4 @@
-import { Button, Flex } from '@mantine/core';
+import { Button, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPlus } from '@tabler/icons-react';
 import { useMission } from '../../contexts/MissionProvider';
@@ -14,14 +14,14 @@ export const AgentList: React.FC = () => {
   const [newAgent, newAgentModal] = useDisclosure();
 
   return (
-    <Flex gap="sm">
+    <Stack gap="sm" p="md">
       {agents.map((agent) => (
         <AgentMenu key={agent.id} agent={agent} onDelete={deleteAgent} />
       ))}
-      <Button variant="outline" leftSection={<IconPlus />} onClick={newAgentModal.open}>
+      <Button variant="transparent" leftSection={<IconPlus />} onClick={newAgentModal.open}>
         Add agent
       </Button>
       <AgentInfo agent={{ name: '', id: '' }} onClose={newAgentModal.close} opened={newAgent} />
-    </Flex>
+    </Stack>
   );
 };

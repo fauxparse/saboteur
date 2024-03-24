@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, createTheme } from '@mantine/core';
 
 import '@mantine/core/styles.css';
 
@@ -18,12 +18,14 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const theme = createTheme({ primaryColor: 'gray' });
+
 const root = document.getElementById('root');
 
 if (root) {
   ReactDOM.createRoot(root).render(
     <StrictMode>
-      <MantineProvider defaultColorScheme="dark">
+      <MantineProvider theme={theme} defaultColorScheme="dark">
         <RouterProvider router={router} />
       </MantineProvider>
     </StrictMode>

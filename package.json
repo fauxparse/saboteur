@@ -17,11 +17,13 @@
     "@tanstack/react-form": "^0.16.0",
     "@tanstack/react-router": "^1.22.2",
     "@tanstack/router-devtools": "^1.22.2",
+    "date-fns": "^3.6.0",
     "firebase": "^10.9.0",
     "lodash-es": "^4.17.21",
     "random-word-slugs": "^0.1.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "use-context-selector": "^1.4.4",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },

@@ -7,19 +7,27 @@ import {
   deleteDoc,
   doc,
   onSnapshot,
+  updateDoc,
 } from 'firebase/firestore';
 import { db } from '@/firebase';
-import { Agent, Mission } from '@/types';
+import { Agent, COLORS, Mission } from '@/types';
 import { z } from 'zod';
+import { sortBy } from 'lodash-es';
 
 export const AgentSchema = z.object({
   id: z.string(),
   name: z.string(),
   userId: z.string().nullable().optional(),
+  color: z.enum(COLORS).optional(),
 });
 
 export const parseAgent = (doc: DocumentSnapshot | QueryDocumentSnapshot): Agent =>
   AgentSchema.parse({ id: doc.id, ...doc.data() });
+
+export const AgentFirebaseSchema = z.object({
+  name: z.string().optional(),
+  color: z.enum(COLORS).optional(),
+});
 
 export const useAgents = (mission: Mission) => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -27,7 +35,7 @@ export const useAgents = (mission: Mission) => {
   const ref = useMemo(() => collection(db, 'missions', mission.id, 'agents'), [mission]);
 
   useEffect(() => {
-    const unsub = onSnapshot(ref, (snapshot) => {
+    const unsubscribe = onSnapshot(ref, (snapshot) => {
       setAgents(
         snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -36,14 +44,24 @@ export const useAgents = (mission: Mission) => {
       );
     });
 
-    return unsub;
+    return unsubscribe;
   }, [ref]);
 
   const createAgent = useCallback(
-    async (name: string) => {
-      await addDoc(ref, { name });
+    async ({ name, color }: Partial<Agent>) => {
+      const defaultColor = sortBy(COLORS, (c) => agents.filter((a) => a.color === c).length)[0];
+      await addDoc(ref, { name, color: color || defaultColor });
     },
-    [ref]
+    [ref, agents]
+  );
+
+  const updateAgent = useCallback(
+    async (agent: Pick<Agent, 'id'> & Record<string, unknown>) => {
+      const ref = doc(db, 'missions', mission.id, 'agents', agent.id);
+      const updates = AgentFirebaseSchema.parse(agent);
+      await updateDoc(ref, updates);
+    },
+    [mission]
   );
 
   const deleteAgent = useCallback(
@@ -58,6 +76,7 @@ export const useAgents = (mission: Mission) => {
   return {
     agents,
     createAgent,
+    updateAgent,
     deleteAgent,
   };
 };
