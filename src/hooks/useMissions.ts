@@ -10,7 +10,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { db } from '@/firebase';
-import { Mission } from '@/types';
+import { Mission, PartialWithId } from '@/types';
 import { omit } from 'lodash-es';
 import { z } from 'zod';
 
@@ -79,7 +79,7 @@ export const useMissions = () => {
     await setDoc(doc(db, 'missions', mission.id), omit(mission, ['id', 'agents']));
   }, []);
 
-  const updateMission = useCallback(async (mission: Pick<Mission, 'id'> & Partial<Mission>) => {
+  const updateMission = useCallback(async (mission: PartialWithId<Mission>) => {
     await setDoc(doc(db, 'missions', mission.id), MissionFirebaseSchema.parse(mission));
   }, []);
 

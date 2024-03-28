@@ -1,13 +1,13 @@
 import { db } from '@/firebase';
 import { MissionFirebaseSchema, parseMission } from '@/hooks/useMissions';
-import { Mission } from '@/types';
+import { Mission, PartialWithId } from '@/types';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 import { createContext, useContextSelector } from 'use-context-selector';
 
 type Context = {
   mission: Mission;
-  updateMission: (mission: Pick<Mission, 'id'> & Partial<Mission>) => void;
+  updateMission: (mission: PartialWithId<Mission>) => void;
 };
 
 type MissionProviderProps = PropsWithChildren<{ mission: Mission }>;
@@ -24,7 +24,7 @@ export const MissionProvider: React.FC<MissionProviderProps> = ({ mission: initi
     return unsubscribe;
   }, [initial]);
 
-  const updateMission = useCallback(async (mission: Pick<Mission, 'id'> & Partial<Mission>) => {
+  const updateMission = useCallback(async (mission: PartialWithId<Mission>) => {
     await updateDoc(doc(db, 'missions', mission.id), MissionFirebaseSchema.parse(mission));
   }, []);
 

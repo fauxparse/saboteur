@@ -1,7 +1,7 @@
 import { db } from '@/firebase';
-import { Mission } from '@/types';
+import { Mission, PartialWithId } from '@/types';
 import { Event, EventFirebaseSchema, EventSchema } from '@/types/Event';
-import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const useEvents = (mission: Mission) => {
@@ -31,8 +31,20 @@ export const useEvents = (mission: Mission) => {
   }, [ref]);
 
   const createSuspicional = useCallback(async () => {
-    await addDoc(ref, EventFirebaseSchema.parse({ type: 'suspicional', startsAt: new Date() }));
+    await addDoc(
+      ref,
+      EventFirebaseSchema.parse({ type: 'suspicional', startsAt: new Date(), accused: [] })
+    );
   }, [ref]);
+
+  const updateEvent = useCallback(
+    async (event: PartialWithId<Event>) => {
+      const ref = doc(db, 'missions', mission.id, 'events', event.id);
+      const updates = EventFirebaseSchema.parse(event);
+      await updateDoc(ref, updates);
+    },
+    [mission.id]
+  );
 
   const deleteEvent = useCallback(
     async (event: Event) => {
@@ -41,5 +53,5 @@ export const useEvents = (mission: Mission) => {
     [ref]
   );
 
-  return { events, createQuiz, createScene, createSuspicional, deleteEvent };
+  return { events, createQuiz, createScene, createSuspicional, updateEvent, deleteEvent };
 };

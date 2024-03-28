@@ -17,6 +17,7 @@ export const EventSchema = z.union([
   }),
   BaseEventSchema.extend({
     type: z.literal('suspicional'),
+    accused: z.array(z.string()),
   }),
   BaseEventSchema.extend({
     type: z.literal('scene'),
@@ -47,6 +48,7 @@ export const EventFirebaseSchema = z.union([
   }),
   BaseEventFirebaseSchema.extend({
     type: z.literal('suspicional'),
+    accused: z.array(z.string()).optional(),
   }),
   BaseEventFirebaseSchema.extend({
     type: z.literal('scene'),

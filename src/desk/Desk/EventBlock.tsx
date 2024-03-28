@@ -4,10 +4,12 @@ import { SceneBlock } from './SceneBlock';
 import { EliminationBlock } from './EliminationBlock';
 import { SuspicionalBlock } from './SuspicionalBlock';
 import React from 'react';
+import { PartialWithId } from '@/types';
 
 type EventBlockProps<T extends Event> = {
   event: T;
   onDelete: (event: T) => void;
+  onUpdate: (event: PartialWithId<T>) => void;
 };
 
 type ComponentMap = {
@@ -21,8 +23,8 @@ const Components: ComponentMap = {
   suspicional: SuspicionalBlock,
 } as const;
 
-export const EventBlock = <T extends Event>({ event, onDelete }: EventBlockProps<T>) => {
+export const EventBlock = <T extends Event>({ event, onUpdate, onDelete }: EventBlockProps<T>) => {
   const Component = Components[event.type] as React.FC<EventBlockProps<T>>;
 
-  return <Component event={event} onDelete={onDelete} />;
+  return <Component event={event} onUpdate={onUpdate} onDelete={onDelete} />;
 };

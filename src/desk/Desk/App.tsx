@@ -1,4 +1,4 @@
-import { ActionIcon, AppShell, Button, Divider, Flex, Stack, Title } from '@mantine/core';
+import { ActionIcon, AppShell, Burger, Button, Divider, Flex, Stack, Title } from '@mantine/core';
 import {
   IconArrowLeft,
   IconHandFinger,
@@ -20,13 +20,17 @@ import { AgentsProvider } from '@/contexts/AgentsProvider';
 import classes from './Desk.module.css';
 import { EventBlock } from './EventBlock';
 import { SaboteurBlock } from './SaboteurBlock';
+import { useDisclosure } from '@mantine/hooks';
 
 export const App: React.FC = () => {
   const { mission } = useMission();
 
   const { agents } = useAgents(mission);
 
-  const { events, createQuiz, createScene, createSuspicional, deleteEvent } = useEvents(mission);
+  const { events, createQuiz, createScene, createSuspicional, updateEvent, deleteEvent } =
+    useEvents(mission);
+
+  const [showSidebar, { toggle: toggleSidebar }] = useDisclosure(false);
 
   const allEvents = useMemo(() => {
     const eliminations: Elimination[] = agents
@@ -48,20 +52,42 @@ export const App: React.FC = () => {
       <AppShell
         className={classes.shell}
         header={{ height: 72 }}
-        navbar={{ width: 300, breakpoint: 'md' }}
+        navbar={{
+          width: 300,
+          breakpoint: 'sm',
+          collapsed: { mobile: !showSidebar, desktop: false },
+        }}
       >
         <AppShell.Header className={classes.header} p="md">
           <Flex align="center" gap="sm">
-            <ActionIcon component={Link} to="/desk" variant="transparent" aria-label="Back">
+            <Burger opened={showSidebar} onClick={toggleSidebar} hiddenFrom="sm" />
+            <ActionIcon
+              component={Link}
+              to="/desk"
+              variant="transparent"
+              aria-label="Back"
+              visibleFrom="sm"
+            >
               <IconArrowLeft />
             </ActionIcon>
-            <Title order={1} size="h4" ff="mono">
+            <Title order={1} size="h4" ff="mono" visibleFrom="sm">
               {mission.id}
             </Title>
           </Flex>
           <Clock />
         </AppShell.Header>
         <AppShell.Navbar>
+          <Stack gap="sm" p="md" hiddenFrom="sm">
+            <Button
+              component={Link}
+              to="/desk"
+              variant="transparent"
+              leftSection={<IconArrowLeft />}
+              justify="start"
+            >
+              Back
+            </Button>
+          </Stack>
           <AgentList />
           <Divider />
           <Stack gap="md" p="md">
@@ -96,7 +122,12 @@ export const App: React.FC = () => {
             {mission.startsAt && <Milestone time={mission.startsAt}>Mission start</Milestone>}
             <SaboteurBlock />
             {allEvents.map((event) => (
-              <EventBlock key={event.id} event={event} onDelete={deleteEvent} />
+              <EventBlock
+                key={event.id}
+                event={event}
+                onUpdate={updateEvent}
+                onDelete={deleteEvent}
+              />
             ))}
             {mission.endsAt && <Milestone time={mission.endsAt}>Mission end</Milestone>}
           </div>

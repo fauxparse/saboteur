@@ -4,3 +4,5 @@ export type Mission = {
   endsAt: Date | null;
   saboteurId?: string | null;
 };
+
+export type PartialWithId<T extends { id: unknown }> = Pick<T, 'id'> & Partial<T>;
