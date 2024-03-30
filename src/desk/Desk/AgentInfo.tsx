@@ -1,5 +1,4 @@
-import { useMission } from '@/contexts/MissionProvider';
-import { useAgents } from '@/hooks/useAgents';
+import { useAgents } from '@/contexts/AgentsProvider';
 import { Agent, COLORS } from '@/types/Agent';
 import {
   Box,
@@ -15,12 +14,11 @@ import { useForm } from '@tanstack/react-form';
 import { useEffect, useMemo, useState } from 'react';
 
 type AgentInfoProps = ModalProps & {
-  agent: Agent;
+  agent: Partial<Agent>;
 };
 
 export const AgentInfo: React.FC<AgentInfoProps> = ({ agent, opened, onClose, ...props }) => {
-  const { mission } = useMission();
-  const { createAgent, updateAgent } = useAgents(mission);
+  const { createAgent, updateAgent } = useAgents();
   const [busy, setBusy] = useState(false);
 
   const theme = useMantineTheme();
@@ -30,7 +28,7 @@ export const AgentInfo: React.FC<AgentInfoProps> = ({ agent, opened, onClose, ..
   const form = useForm({
     defaultValues: {
       name: agent.name,
-      color: (agent.id && String(agent.color)) || undefined,
+      color: (agent.id && (String(agent.color) as Agent['color'])) || undefined,
     },
     onSubmit: async ({ value }) => {
       setBusy(true);

@@ -1,9 +1,11 @@
 import { Suspicional } from '@/types/Event';
 import { Milestone } from './Milestone';
 import { IconHandFinger, IconTrash } from '@tabler/icons-react';
-import { Menu } from '@mantine/core';
+import { Group, Menu, Text } from '@mantine/core';
 import { AgentPicker } from './AgentPicker';
 import { PartialWithId } from '@/types';
+import { useAgents } from '@/contexts/AgentsProvider';
+import { AgentName } from './AgentName';
 
 type SuspicionalBlockProps = {
   event: Suspicional;
@@ -16,6 +18,8 @@ export const SuspicionalBlock: React.FC<SuspicionalBlockProps> = ({
   onUpdate,
   onDelete,
 }) => {
+  const { saboteur } = useAgents();
+
   return (
     <Milestone
       icon={<IconHandFinger />}
@@ -28,10 +32,21 @@ export const SuspicionalBlock: React.FC<SuspicionalBlockProps> = ({
         </>
       }
     >
-      <AgentPicker
-        value={suspicional.accused}
-        onChange={(accused) => onUpdate({ ...suspicional, accused })}
-      />
+      <Group>
+        {saboteur ? (
+          <>
+            <AgentName agent={saboteur} />
+            <Text>accused</Text>
+            <AgentPicker
+              exceptSaboteur
+              value={suspicional.accused}
+              onChange={(accused) => onUpdate({ ...suspicional, accused })}
+            />
+          </>
+        ) : (
+          <Text>There is no saboteur</Text>
+        )}
+      </Group>
     </Milestone>
   );
 };

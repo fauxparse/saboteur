@@ -31,7 +31,7 @@ type QuestionEditorProps = {
 const QuestionEditor: React.FC<QuestionEditorProps> = ({ question: initial }) => {
   const { mission } = useMission();
   const { quiz, deleteQuestion } = useQuiz();
-  const { agents } = useAgents();
+  const { agents, saboteur } = useAgents();
 
   const [question, setQuestion] = useState(initial);
   const [answers, setAnswers] = useState<Answer[]>([]);
@@ -51,9 +51,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question: initial }) =>
     },
   });
 
-  useEffect(() => {
-    form.setFieldValue('answers', answers);
-  }, [form, answers]);
+  useEffect(() => form.setFieldValue('answers', answers), [answers, form.setFieldValue]);
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: question.id,
@@ -76,83 +74,87 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question: initial }) =>
     return unsubscribe;
   }, [baseRef]);
 
-  useEffect(() => {
-    const unsubscribe =
-      question.type === 'custom'
-        ? onSnapshot(collection(baseRef, 'answers'), (snapshot) => {
-            setAnswers(sortBy(snapshot.docs.map(parseAnswer), 'position'));
-          })
-        : onSnapshot(collection(db, 'missions', mission.id, 'events'), (snapshot) => {
-            const events = sortBy(snapshot.docs.map(parseEvent), 'startsAt') as Event[];
-            const index = events.findIndex((event) => event.id === quiz.id);
-            const previousQuiz = events
-              .slice(0, index)
-              .reverse()
-              .find((e) => e.type === 'quiz');
-            const eventsSincePreviousQuiz = events
-              .slice(0, index)
-              .filter((e) => (previousQuiz ? isAfter(e.startsAt, previousQuiz.startsAt) : true));
+  const [accused, setAccused] = useState<Set<string>>(new Set());
 
-            switch (question.type) {
-              case 'scenes':
-                setAnswers(
-                  eventsSincePreviousQuiz.reduce(
-                    (acc: Answer[], event: Event, position: number) => {
-                      if (event.type === 'scene')
-                        acc.push({
-                          id: event.id,
-                          position,
-                          label: event.name,
-                          correct: !!event.sabotaged,
-                        });
-                      return acc;
-                    },
-                    [] as Answer[]
-                  )
-                );
-                break;
-              case 'suspicional': {
-                const accused = eventsSincePreviousQuiz.reduce((acc: string[], event: Event) => {
-                  if (event.type === 'suspicional') acc.push(...event.accused);
-                  return acc;
-                }, []);
-                setAnswers([
-                  ...[...agents.values()].map((agent, position) => ({
-                    id: agent.id,
-                    label: agent.name,
-                    position,
-                    correct: accused.includes(agent.id) && accused.length === 1,
-                  })),
-                  {
-                    id: 'none',
-                    label: 'Nobody',
-                    position: agents.size,
-                    correct: accused.length === 0,
-                  },
-                  {
-                    id: 'unclear',
-                    label: 'Multiple/unclear',
-                    position: agents.size + 1,
-                    correct: accused.length > 1,
-                  },
-                ]);
-                break;
-              }
-              case 'accusation': {
-                setAnswers(
-                  [...agents.values()].map((agent, position) => ({
-                    id: agent.id,
-                    label: agent.name,
-                    position,
-                    correct: agent.id === mission.saboteurId,
-                  }))
-                );
-                break;
-              }
-            }
-          });
-    return unsubscribe;
-  }, [mission.id, quiz.id, question.type, mission.saboteurId, agents, baseRef]);
+  useEffect(() => {
+    if (question.type === 'suspicional') {
+      setAnswers([
+        ...agents.map((agent, position) => ({
+          id: agent.id,
+          label: agent.name,
+          position,
+          correct: accused.has(agent.id) && accused.size === 1,
+        })),
+        {
+          id: 'none',
+          label: 'Nobody',
+          position: agents.length,
+          correct: accused.size === 0,
+        },
+        {
+          id: 'unclear',
+          label: 'Multiple/unclear',
+          position: agents.length + 1,
+          correct: accused.size > 1,
+        },
+      ]);
+    } else if (question.type === 'accusation') {
+      setAnswers(
+        agents.map((agent, position) => ({
+          id: agent.id,
+          label: agent.name,
+          position,
+          correct: agent.id === saboteur?.id,
+        }))
+      );
+    }
+  }, [agents, accused, question.type, saboteur]);
+
+  useEffect(() => {
+    if (question.type === 'custom') {
+      return onSnapshot(collection(baseRef, 'answers'), (snapshot) => {
+        setAnswers(sortBy(snapshot.docs.map(parseAnswer), 'position'));
+      });
+    }
+    return onSnapshot(collection(db, 'missions', mission.id, 'events'), (snapshot) => {
+      const events = sortBy(snapshot.docs.map(parseEvent), 'startsAt') as Event[];
+      const index = events.findIndex((event) => event.id === quiz.id);
+      const previousQuiz = events
+        .slice(0, index)
+        .reverse()
+        .find((e) => e.type === 'quiz');
+      const eventsSincePreviousQuiz = events
+        .slice(0, index)
+        .filter((e) => (previousQuiz ? isAfter(e.startsAt, previousQuiz.startsAt) : true));
+
+      switch (question.type) {
+        case 'scenes':
+          setAnswers(
+            eventsSincePreviousQuiz.reduce((acc: Answer[], event: Event, position: number) => {
+              if (event.type === 'scene')
+                acc.push({
+                  id: event.id,
+                  position,
+                  label: event.name,
+                  correct: !!event.sabotaged,
+                });
+              return acc;
+            }, [] as Answer[])
+          );
+          break;
+        case 'suspicional':
+          setAccused(
+            new Set(
+              eventsSincePreviousQuiz.reduce((acc: string[], event: Event) => {
+                if (event.type === 'suspicional') acc.push(...event.accused);
+                return acc;
+              }, [])
+            )
+          );
+          break;
+      }
+    });
+  }, [mission.id, quiz.id, question.type, baseRef]);
 
   const editable = question.type === 'custom';
 
@@ -241,11 +243,11 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question: initial }) =>
                   <form.Field name={`answers[${i}].correct`}>
                     {(subfield) => (
                       <Checkbox
-                        checked={subfield.state.value ?? false}
+                        checked={answers[i].correct ?? false}
                         disabled={!editable}
                         onChange={(e) => {
                           subfield.handleChange(e.currentTarget.checked);
-                          updateAnswer({ id: answer.id, correct: e.currentTarget.checked });
+                          updateAnswer({ id: answers[i].id, correct: e.currentTarget.checked });
                         }}
                       />
                     )}
@@ -253,15 +255,16 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question: initial }) =>
                   <form.Field name={`answers[${i}].label`}>
                     {(subfield) => (
                       <TextInput
-                        value={subfield.state.value ?? ''}
+                        value={(editable ? subfield.state.value : answers[i].label) ?? ''}
                         flex={1}
                         readOnly={!editable}
-                        data-answer-id={answer.id}
+                        data-answer-id={answers[i].id}
                         onKeyDown={answerKeyDown}
                         onChange={(e) => subfield.handleChange(e.currentTarget.value)}
                         onBlur={(e) => {
+                          if (!editable) return;
                           subfield.handleChange(e.currentTarget.value);
-                          updateAnswer({ id: answer.id, label: e.currentTarget.value });
+                          updateAnswer({ id: answers[i].id, label: e.currentTarget.value });
                         }}
                       />
                     )}

@@ -1,17 +1,14 @@
 import { Button, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPlus } from '@tabler/icons-react';
-import { useMission } from '../../contexts/MissionProvider';
 import { AgentInfo } from './AgentInfo';
 import { AgentMenu } from './AgentMenu';
-import { useAgents } from '@/hooks/useAgents';
+import { useAgents } from '@/contexts/AgentsProvider';
 import { Agent } from '@/types/Agent';
 import { useCallback } from 'react';
 
 export const AgentList: React.FC = () => {
-  const { mission } = useMission();
-
-  const { agents, deleteAgent, eliminateAgent, updateAgent } = useAgents(mission);
+  const { agents, deleteAgent, eliminateAgent, updateAgent } = useAgents();
 
   const [newAgent, newAgentModal] = useDisclosure();
 
@@ -41,7 +38,11 @@ export const AgentList: React.FC = () => {
       >
         Add agent
       </Button>
-      <AgentInfo agent={{ name: '', id: '' }} onClose={newAgentModal.close} opened={newAgent} />
+      <AgentInfo
+        agent={{ name: '', id: '', position: agents.length }}
+        onClose={newAgentModal.close}
+        opened={newAgent}
+      />
     </Stack>
   );
 };

@@ -1,4 +1,4 @@
-import { Group, Text } from '@mantine/core';
+import { Group } from '@mantine/core';
 import React from 'react';
 import { Agent } from '@/types/Agent';
 import { AgentName } from './AgentName';
@@ -6,10 +6,11 @@ import { useAgents } from '@/contexts/AgentsProvider';
 
 type AgentPickerProps = {
   value: string[];
+  exceptSaboteur?: boolean;
   onChange: (value: string[]) => void;
 };
 
-export const AgentPicker: React.FC<AgentPickerProps> = ({ value, onChange }) => {
+export const AgentPicker: React.FC<AgentPickerProps> = ({ value, exceptSaboteur, onChange }) => {
   const { agents, saboteur } = useAgents();
 
   const toggle = (agent: Agent) => {
@@ -22,11 +23,9 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({ value, onChange }) => 
 
   return (
     <Group gap="sm">
-      {saboteur ? (
-        <>
-          <AgentName agent={saboteur} />
-          <Text>accused</Text>
-          {[...agents.values()].map((agent) => (
+      {[...agents.values()].map(
+        (agent) =>
+          (!exceptSaboteur || agent.id !== saboteur?.id) && (
             <AgentName
               key={agent.id}
               agent={agent}
@@ -36,10 +35,7 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({ value, onChange }) => 
             >
               {agent.name}
             </AgentName>
-          ))}
-        </>
-      ) : (
-        <Text>There is no saboteur</Text>
+          )
       )}
     </Group>
   );

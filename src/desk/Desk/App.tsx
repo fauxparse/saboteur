@@ -10,7 +10,7 @@ import { AgentList } from './AgentList';
 import { Clock } from './Clock';
 import { Milestone } from './Milestone';
 import { useMission } from '@/contexts/MissionProvider';
-import { useAgents } from '@/hooks/useAgents';
+import { useAgents } from '@/contexts/AgentsProvider';
 import { useMemo } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { Elimination } from '@/types/Event';
@@ -25,7 +25,7 @@ import { useDisclosure } from '@mantine/hooks';
 export const App: React.FC = () => {
   const { mission } = useMission();
 
-  const { agents } = useAgents(mission);
+  const { agents } = useAgents();
 
   const { events, createQuiz, createScene, createSuspicional, updateEvent, deleteEvent } =
     useEvents(mission);
@@ -48,7 +48,7 @@ export const App: React.FC = () => {
   }, [events, agents]);
 
   return (
-    <AgentsProvider agents={agents}>
+    <AgentsProvider>
       <AppShell
         className={classes.shell}
         header={{ height: 72 }}
