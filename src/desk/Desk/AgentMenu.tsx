@@ -45,7 +45,9 @@ export const AgentMenu: React.FC<AgentMenuProps> = ({
         <Menu.Target>
           <Button
             color={agent.color || undefined}
-            leftSection={isSaboteur ? <IconEyeglass2 /> : <IconLego />}
+            leftSection={
+              isSaboteur ? <IconEyeglass2 /> : agent.eliminatedAt ? <IconGhost /> : <IconLego />
+            }
             justify="start"
             variant={agent.eliminatedAt ? 'light' : 'filled'}
           >

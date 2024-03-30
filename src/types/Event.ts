@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { DocumentSnapshot, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 import { z } from 'zod';
 
 const BaseEventSchema = z.object({
@@ -11,7 +11,6 @@ export const EventSchema = z.union([
     type: z.literal('quiz'),
     endsAt: z
       .instanceof(Timestamp)
-      .optional()
       .nullable()
       .transform((t) => t?.toDate()),
   }),
@@ -74,3 +73,6 @@ export const isSuspicional = (event: Event): event is Suspicional => event.type 
 export const isScene = (event: Event): event is Scene => event.type === 'scene';
 
 export const isElimination = (event: Event): event is Elimination => event.type === 'elimination';
+
+export const parseEvent = (data: DocumentSnapshot | QueryDocumentSnapshot) =>
+  EventSchema.parse({ id: data.id, ...data.data() });

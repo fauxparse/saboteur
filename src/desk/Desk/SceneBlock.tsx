@@ -4,6 +4,9 @@ import { IconMasksTheater, IconTrash } from '@tabler/icons-react';
 import { Checkbox, Group, Menu, TextInput } from '@mantine/core';
 import { useForm } from '@tanstack/react-form';
 import { useAgents } from '@/contexts/AgentsProvider';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/firebase';
+import { useMission } from '@/contexts/MissionProvider';
 
 type SceneBlockProps = {
   event: Scene;
@@ -11,15 +14,17 @@ type SceneBlockProps = {
 };
 
 export const SceneBlock: React.FC<SceneBlockProps> = ({ event: scene, onDelete }) => {
+  const { mission } = useMission();
+
   const { saboteur } = useAgents();
 
   const form = useForm({
     defaultValues: {
-      name: '',
-      sabotaged: false,
+      name: scene.name,
+      sabotaged: !!scene.sabotaged,
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
+      await updateDoc(doc(db, 'missions', mission.id, 'events', scene.id), value);
     },
   });
 
@@ -50,7 +55,10 @@ export const SceneBlock: React.FC<SceneBlockProps> = ({ event: scene, onDelete }
               placeholder="Brief description of the scene"
               value={field.state.value}
               onChange={(e) => field.handleChange(e.currentTarget.value)}
-              onBlur={field.handleBlur}
+              onBlur={(e) => {
+                field.handleChange(e.currentTarget.value);
+                form.handleSubmit();
+              }}
             />
           )}
         </form.Field>
@@ -60,7 +68,10 @@ export const SceneBlock: React.FC<SceneBlockProps> = ({ event: scene, onDelete }
               label="Sabotaged?"
               color={saboteur?.color || undefined}
               checked={field.state.value}
-              onChange={(e) => field.handleChange(e.currentTarget.checked)}
+              onChange={(e) => {
+                field.handleChange(e.currentTarget.checked);
+                form.handleSubmit();
+              }}
             />
           )}
         </form.Field>

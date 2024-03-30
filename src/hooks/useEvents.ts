@@ -17,10 +17,12 @@ export const useEvents = (mission: Mission) => {
   }, [ref]);
 
   const createQuiz = useCallback(async () => {
-    await addDoc(
+    const doc = await addDoc(
       ref,
       EventFirebaseSchema.parse({ type: 'quiz', startsAt: new Date(), endsAt: null })
     );
+
+    console.log(doc.id);
   }, [ref]);
 
   const createScene = useCallback(async () => {
