@@ -23,7 +23,7 @@ export const SuspicionalBlock: React.FC<SuspicionalBlockProps> = ({
   return (
     <Milestone
       icon={<IconHandFinger />}
-      time={suspicional.startsAt}
+      time={suspicional.timestamp}
       menu={
         <>
           <Menu.Item leftSection={<IconTrash />} color="red" onClick={() => onDelete(suspicional)}>

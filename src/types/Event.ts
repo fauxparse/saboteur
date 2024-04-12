@@ -3,16 +3,20 @@ import { z } from 'zod';
 
 const BaseEventSchema = z.object({
   id: z.string(),
-  startsAt: z.instanceof(Timestamp).transform((t) => t?.toDate()),
+  timestamp: z.instanceof(Timestamp).transform((t) => t?.toDate()),
 });
 
 export const EventSchema = z.union([
   BaseEventSchema.extend({
     type: z.literal('quiz'),
+    startsAt: z
+      .instanceof(Timestamp)
+      .nullable()
+      .transform((t) => t?.toDate() || null),
     endsAt: z
       .instanceof(Timestamp)
       .nullable()
-      .transform((t) => t?.toDate()),
+      .transform((t) => t?.toDate() || null),
   }),
   BaseEventSchema.extend({
     type: z.literal('suspicional'),
@@ -30,7 +34,7 @@ export const EventSchema = z.union([
 ]);
 
 const BaseEventFirebaseSchema = z.object({
-  startsAt: z
+  timestamp: z
     .instanceof(Date)
     .transform((t) => t && Timestamp.fromDate(t))
     .optional(),
@@ -39,6 +43,11 @@ const BaseEventFirebaseSchema = z.object({
 export const EventFirebaseSchema = z.union([
   BaseEventFirebaseSchema.extend({
     type: z.literal('quiz'),
+    startsAt: z
+      .instanceof(Date)
+      .transform((t) => t && Timestamp.fromDate(t))
+      .nullable()
+      .optional(),
     endsAt: z
       .instanceof(Date)
       .transform((t) => t && Timestamp.fromDate(t))

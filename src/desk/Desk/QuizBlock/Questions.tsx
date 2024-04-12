@@ -1,6 +1,6 @@
 import { useQuiz } from '@/contexts/QuizProvider';
 import { DEFAULT_QUESTIONS, Question } from '@/types/Question';
-import { Accordion, Button, ButtonGroup, Stack } from '@mantine/core';
+import { Accordion, Button, Group, Stack } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { useCallback, useState } from 'react';
 import QuestionEditor from './QuestionEditor';
@@ -19,11 +19,12 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { QuestionProvider } from '@/contexts/QuestionProvider';
 
 export const Questions: React.FC = () => {
   const [openQuestion, setOpenQuestion] = useState<string | null>(null);
 
-  const { questions, addQuestion, reorderQuestions } = useQuiz();
+  const { quiz, questions, addQuestion, reorderQuestions, startQuiz, endQuiz } = useQuiz();
 
   const addNextQuestion = useCallback(async () => {
     const type = (Object.keys(DEFAULT_QUESTIONS).find(
@@ -63,16 +64,24 @@ export const Questions: React.FC = () => {
         >
           <SortableContext items={questions} strategy={verticalListSortingStrategy}>
             {questions.map((question) => (
-              <QuestionEditor key={question.id} question={question} />
+              <QuestionProvider key={question.id} question={question}>
+                <QuestionEditor />
+              </QuestionProvider>
             ))}
           </SortableContext>
         </DndContext>
       </Accordion>
-      <ButtonGroup>
+      <Group>
         <Button leftSection={<IconPlus />} onClick={addNextQuestion}>
           Add question
         </Button>
-      </ButtonGroup>
+
+        {quiz.startsAt && !quiz.endsAt ? (
+          <Button onClick={endQuiz}>End quiz</Button>
+        ) : (
+          <Button onClick={startQuiz}>Start quiz</Button>
+        )}
+      </Group>
     </Stack>
   );
 };

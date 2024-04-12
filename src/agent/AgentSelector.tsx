@@ -58,7 +58,7 @@ export const AgentSelector: React.FC = () => {
         <Card.Section p="md">
           <Stack align="stretch">
             {agents.map((agent) => (
-              <Button size="lg" onClick={() => signIn(agent)}>
+              <Button key={agent.id} size="lg" onClick={() => signIn(agent)}>
                 {agent.name}
               </Button>
             ))}

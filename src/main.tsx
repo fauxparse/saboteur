@@ -18,7 +18,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
-const theme = createTheme({ primaryColor: 'gray' });
+const theme = createTheme({
+  primaryColor: 'gray',
+  fontFamily: 'Rubik, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
+});
 
 const root = document.getElementById('root');
 

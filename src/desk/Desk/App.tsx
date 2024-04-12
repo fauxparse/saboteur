@@ -40,11 +40,11 @@ export const App: React.FC = () => {
           ({
             id: a.id,
             type: 'elimination',
-            startsAt: a.eliminatedAt,
+            timestamp: a.eliminatedAt,
             agentId: a.id,
           }) as Elimination
       );
-    return sortBy([...events, ...eliminations], ({ startsAt }) => startsAt.valueOf());
+    return sortBy([...events, ...eliminations], ({ timestamp }) => timestamp.valueOf());
   }, [events, agents]);
 
   return (
@@ -70,7 +70,7 @@ export const App: React.FC = () => {
             >
               <IconArrowLeft />
             </ActionIcon>
-            <Title order={1} size="h4" ff="mono" visibleFrom="sm">
+            <Title order={1} size="h4" visibleFrom="sm">
               {mission.id}
             </Title>
           </Flex>

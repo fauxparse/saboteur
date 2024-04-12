@@ -1,5 +1,5 @@
 import { db } from '@/firebase';
-import { EventSchema, Quiz } from '@/types/Event';
+import { EventFirebaseSchema, EventSchema, Quiz } from '@/types/Event';
 import {
   onSnapshot,
   doc,
@@ -16,6 +16,7 @@ import { createContext, useContextSelector } from 'use-context-selector';
 import { useMission } from './MissionProvider';
 import { DEFAULT_QUESTIONS, Question, parseQuestion } from '@/types/Question';
 import { sortBy } from 'lodash-es';
+import { PartialWithId } from '@/types';
 
 type QuizProviderProps = {
   quiz: Quiz;
@@ -27,6 +28,10 @@ type Context = {
   addQuestion: (type: Question['type']) => Promise<Question>;
   deleteQuestion: (question: Question) => Promise<void>;
   reorderQuestions: (questions: Question[]) => Promise<void>;
+  startQuiz: () => Promise<void>;
+  endQuiz: () => Promise<void>;
+  setCorrectAnswersForQuestion: (questionId: string, correctAnswerIds: string[]) => void;
+  correctAnswersForQuestion: (questionId: string) => Set<string>;
 };
 
 const QuizContext = createContext<Context>({} as Context);
@@ -41,24 +46,28 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
+  const [correctAnswers, setCorrectAnswers] = useState<Record<string, Set<string>>>({});
+
   const questionsRef = useMemo(
     () => collection(db, 'missions', mission.id, 'events', initial.id, 'questions'),
     [mission.id, initial.id]
   );
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, 'missions', mission.id, 'events', initial.id), (doc) => {
-      if (doc.exists()) setQuiz(parseQuiz(doc));
-    });
-    return unsubscribe;
-  }, [mission.id, initial.id]);
+  useEffect(
+    () =>
+      onSnapshot(doc(db, 'missions', mission.id, 'events', initial.id), (doc) => {
+        if (doc.exists()) setQuiz(parseQuiz(doc));
+      }),
+    [mission.id, initial.id]
+  );
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(questionsRef, (snapshot) => {
-      setQuestions(sortBy(snapshot.docs.map(parseQuestion), 'position'));
-    });
-    return unsubscribe;
-  }, [questionsRef]);
+  useEffect(
+    () =>
+      onSnapshot(questionsRef, (snapshot) => {
+        setQuestions(sortBy(snapshot.docs.map(parseQuestion), 'position'));
+      }),
+    [questionsRef]
+  );
 
   const addQuestion = useCallback(
     async (type: Question['type']) => {
@@ -94,9 +103,58 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
     [questionsRef]
   );
 
+  const updateQuiz = useCallback(
+    async (quiz: PartialWithId<Quiz>) => {
+      await updateDoc(
+        doc(db, 'missions', mission.id, 'events', quiz.id),
+        EventFirebaseSchema.parse({ type: 'quiz', ...quiz })
+      );
+    },
+    [mission.id]
+  );
+
+  const startQuiz = useCallback(async () => {
+    await updateQuiz({ id: quiz.id, startsAt: quiz.startsAt || new Date(), endsAt: null });
+  }, [updateQuiz, quiz.id, quiz.startsAt]);
+
+  const endQuiz = useCallback(async () => {
+    await updateQuiz({ id: quiz.id, endsAt: new Date() });
+  }, [updateQuiz, quiz.id]);
+
+  const setCorrectAnswersForQuestion = useCallback(
+    (questionId: string, correctAnswerIds: string[]) =>
+      setCorrectAnswers((prev) => ({ ...prev, [questionId]: new Set(correctAnswerIds) })),
+    []
+  );
+
+  const correctAnswersForQuestion = useCallback(
+    (questionId: string) => correctAnswers[questionId] ?? new Set<string>(),
+    [correctAnswers]
+  );
+
   const value = useMemo(
-    () => ({ quiz, questions, addQuestion, deleteQuestion, reorderQuestions }),
-    [quiz, questions, addQuestion, deleteQuestion, reorderQuestions]
+    () => ({
+      quiz,
+      questions,
+      addQuestion,
+      deleteQuestion,
+      reorderQuestions,
+      startQuiz,
+      endQuiz,
+      setCorrectAnswersForQuestion,
+      correctAnswersForQuestion,
+    }),
+    [
+      quiz,
+      questions,
+      addQuestion,
+      deleteQuestion,
+      reorderQuestions,
+      startQuiz,
+      endQuiz,
+      setCorrectAnswersForQuestion,
+      correctAnswersForQuestion,
+    ]
   );
 
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;

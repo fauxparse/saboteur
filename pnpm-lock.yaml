@@ -38,6 +38,9 @@ dependencies:
   firebase:
     specifier: ^10.9.0
     version: 10.9.0
+  framer-motion:
+    specifier: ^11.0.24
+    version: 11.0.24(react-dom@18.2.0)(react@18.2.0)
   lodash-es:
     specifier: ^4.17.21
     version: 4.17.21
@@ -1856,6 +1859,25 @@ packages:
       '@firebase/util': 1.9.4
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
+    dev: false
+
+  /framer-motion@11.0.24(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-l2iM8NR53qtcujgAqYvGPJJGModPNWEVUaATRDLfnaLvUoFpImovBm0AHalSSsY8tW6knP8mfJTW4WYGbnAe4w==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      tslib: 2.6.2
     dev: false
 
   /fsevents@2.3.3:

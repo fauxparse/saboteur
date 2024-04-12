@@ -17,7 +17,7 @@ export const EliminationBlock: React.FC<EliminationBlockProps> = ({ event: elimi
 
   return (
     agent && (
-      <Milestone time={elimination.startsAt} icon={<IconSlice />}>
+      <Milestone time={elimination.timestamp} icon={<IconSlice />}>
         <span>
           <AgentName agent={agent} /> was eliminated!
         </span>

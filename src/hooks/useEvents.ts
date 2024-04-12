@@ -10,6 +10,7 @@ export const useEvents = (mission: Mission) => {
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
+    console.log('boop');
     const unsubscribe = onSnapshot(ref, (snapshot) => {
       setEvents(snapshot.docs.map((doc) => EventSchema.parse({ id: doc.id, ...doc.data() })));
     });
@@ -19,7 +20,12 @@ export const useEvents = (mission: Mission) => {
   const createQuiz = useCallback(async () => {
     const doc = await addDoc(
       ref,
-      EventFirebaseSchema.parse({ type: 'quiz', startsAt: new Date(), endsAt: null })
+      EventFirebaseSchema.parse({
+        type: 'quiz',
+        timestamp: new Date(),
+        startsAt: null,
+        endsAt: null,
+      })
     );
 
     console.log(doc.id);
@@ -28,14 +34,19 @@ export const useEvents = (mission: Mission) => {
   const createScene = useCallback(async () => {
     await addDoc(
       ref,
-      EventFirebaseSchema.parse({ type: 'scene', startsAt: new Date(), name: '', sabotaged: false })
+      EventFirebaseSchema.parse({
+        type: 'scene',
+        timestamp: new Date(),
+        name: '',
+        sabotaged: false,
+      })
     );
   }, [ref]);
 
   const createSuspicional = useCallback(async () => {
     await addDoc(
       ref,
-      EventFirebaseSchema.parse({ type: 'suspicional', startsAt: new Date(), accused: [] })
+      EventFirebaseSchema.parse({ type: 'suspicional', timestamp: new Date(), accused: [] })
     );
   }, [ref]);
 

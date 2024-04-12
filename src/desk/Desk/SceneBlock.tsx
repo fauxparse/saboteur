@@ -31,7 +31,7 @@ export const SceneBlock: React.FC<SceneBlockProps> = ({ event: scene, onDelete }
   return (
     <Milestone
       icon={<IconMasksTheater />}
-      time={scene.startsAt}
+      time={scene.timestamp}
       menu={
         <>
           <Menu.Item leftSection={<IconTrash />} color="red" onClick={() => onDelete(scene)}>

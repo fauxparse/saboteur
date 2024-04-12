@@ -1,9 +1,10 @@
 import { Quiz } from '@/types/Event';
-import { Milestone } from './Milestone';
+import { Milestone } from '../Milestone';
 import { IconHelpCircle, IconTrash } from '@tabler/icons-react';
 import { Menu } from '@mantine/core';
 import { QuizProvider } from '@/contexts/QuizProvider';
 import { Questions } from './Questions';
+import { ResponseSummary } from './ResponseSummary';
 
 type QuizBlockProps = {
   event: Quiz;
@@ -15,7 +16,7 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({ event: quiz, onDelete }) =
     <QuizProvider quiz={quiz}>
       <Milestone
         icon={<IconHelpCircle />}
-        time={quiz.startsAt}
+        time={quiz.timestamp}
         menu={
           <>
             <Menu.Item leftSection={<IconTrash />} color="red" onClick={() => onDelete(quiz)}>
@@ -26,6 +27,7 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({ event: quiz, onDelete }) =
       >
         <Questions />
       </Milestone>
+      {quiz.startsAt && <ResponseSummary />}
     </QuizProvider>
   );
 };

@@ -1,9 +1,7 @@
-import { useAgents } from '@/contexts/AgentsProvider';
 import { useMission } from '@/contexts/MissionProvider';
 import { useQuiz } from '@/contexts/QuizProvider';
 import { db } from '@/firebase';
-import { Event, parseEvent } from '@/types/Event';
-import { Answer, Question, parseAnswer, parseQuestion } from '@/types/Question';
+import { Answer, parseQuestion } from '@/types/Question';
 import { useSortable } from '@dnd-kit/sortable';
 import {
   Accordion,
@@ -16,25 +14,19 @@ import {
   TextInput,
 } from '@mantine/core';
 import { IconMenu2, IconPlus, IconTrash } from '@tabler/icons-react';
-import { isAfter } from 'date-fns';
 import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { sortBy } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CSS } from '@dnd-kit/utilities';
 import { useForm } from '@tanstack/react-form';
 import { PartialWithId } from '@/types';
+import { useQuestion } from '@/contexts/QuestionProvider';
 
-type QuestionEditorProps = {
-  question: Question;
-};
-
-const QuestionEditor: React.FC<QuestionEditorProps> = ({ question: initial }) => {
+const QuestionEditor: React.FC = () => {
   const { mission } = useMission();
   const { quiz, deleteQuestion } = useQuiz();
-  const { agents, saboteur } = useAgents();
+  const { question: initial, answers } = useQuestion();
 
   const [question, setQuestion] = useState(initial);
-  const [answers, setAnswers] = useState<Answer[]>([]);
 
   const form = useForm({
     defaultValues: {
@@ -73,88 +65,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question: initial }) =>
     });
     return unsubscribe;
   }, [baseRef]);
-
-  const [accused, setAccused] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (question.type === 'suspicional') {
-      setAnswers([
-        ...agents.map((agent, position) => ({
-          id: agent.id,
-          label: agent.name,
-          position,
-          correct: accused.has(agent.id) && accused.size === 1,
-        })),
-        {
-          id: 'none',
-          label: 'Nobody',
-          position: agents.length,
-          correct: accused.size === 0,
-        },
-        {
-          id: 'unclear',
-          label: 'Multiple/unclear',
-          position: agents.length + 1,
-          correct: accused.size > 1,
-        },
-      ]);
-    } else if (question.type === 'accusation') {
-      setAnswers(
-        agents.map((agent, position) => ({
-          id: agent.id,
-          label: agent.name,
-          position,
-          correct: agent.id === saboteur?.id,
-        }))
-      );
-    }
-  }, [agents, accused, question.type, saboteur]);
-
-  useEffect(() => {
-    if (question.type === 'custom') {
-      return onSnapshot(collection(baseRef, 'answers'), (snapshot) => {
-        setAnswers(sortBy(snapshot.docs.map(parseAnswer), 'position'));
-      });
-    }
-    return onSnapshot(collection(db, 'missions', mission.id, 'events'), (snapshot) => {
-      const events = sortBy(snapshot.docs.map(parseEvent), 'startsAt') as Event[];
-      const index = events.findIndex((event) => event.id === quiz.id);
-      const previousQuiz = events
-        .slice(0, index)
-        .reverse()
-        .find((e) => e.type === 'quiz');
-      const eventsSincePreviousQuiz = events
-        .slice(0, index)
-        .filter((e) => (previousQuiz ? isAfter(e.startsAt, previousQuiz.startsAt) : true));
-
-      switch (question.type) {
-        case 'scenes':
-          setAnswers(
-            eventsSincePreviousQuiz.reduce((acc: Answer[], event: Event, position: number) => {
-              if (event.type === 'scene')
-                acc.push({
-                  id: event.id,
-                  position,
-                  label: event.name,
-                  correct: !!event.sabotaged,
-                });
-              return acc;
-            }, [] as Answer[])
-          );
-          break;
-        case 'suspicional':
-          setAccused(
-            new Set(
-              eventsSincePreviousQuiz.reduce((acc: string[], event: Event) => {
-                if (event.type === 'suspicional') acc.push(...event.accused);
-                return acc;
-              }, [])
-            )
-          );
-          break;
-      }
-    });
-  }, [mission.id, quiz.id, question.type, baseRef]);
 
   const editable = question.type === 'custom';
 
