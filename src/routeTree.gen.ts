@@ -13,7 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as PublicIndexImport } from './routes/_public/index'
+import { Route as AudienceIndexImport } from './routes/_audience/index'
 import { Route as DeskAuthenticatedImport } from './routes/desk/_authenticated'
 import { Route as AgentMissionsImport } from './routes/agent/_missions'
 import { Route as AgentMissionsIndexImport } from './routes/agent/_missions.index'
@@ -42,7 +42,7 @@ const AgentRoute = AgentImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const PublicIndexRoute = PublicIndexImport.update({
+const AudienceIndexRoute = AudienceIndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
@@ -119,8 +119,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeskAuthenticatedImport
       parentRoute: typeof DeskRoute
     }
-    '/_public/': {
-      preLoaderRoute: typeof PublicIndexImport
+    '/_audience/': {
+      preLoaderRoute: typeof AudienceIndexImport
       parentRoute: typeof rootRoute
     }
     '/agent/_missions/$missionId': {
@@ -169,7 +169,7 @@ export const routeTree = rootRoute.addChildren([
       DeskAuthenticatedIndexLazyRoute,
     ]),
   ]),
-  PublicIndexRoute,
+  AudienceIndexRoute,
 ])
 
 /* prettier-ignore-end */

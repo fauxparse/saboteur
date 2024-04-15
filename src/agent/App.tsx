@@ -8,6 +8,7 @@ import { Timestamp, collection, onSnapshot, query, where } from 'firebase/firest
 import { db } from '@/firebase';
 import { QuizProvider } from '@/contexts/QuizProvider';
 import { TakeQuiz } from './TakeQuiz';
+import { AwaitFurtherInstructions } from './AwaitFurtherInstructions';
 
 import classes from './Agent.module.css';
 
@@ -61,12 +62,12 @@ export const App: React.FC = () => {
       <AppShell.Main style={{ display: 'grid' }}>
         {agent.eliminatedAt ? (
           <Center h="full">You have been eliminated.</Center>
+        ) : quiz ? (
+          <QuizProvider quiz={quiz}>
+            <TakeQuiz />
+          </QuizProvider>
         ) : (
-          quiz && (
-            <QuizProvider quiz={quiz}>
-              <TakeQuiz />
-            </QuizProvider>
-          )
+          <AwaitFurtherInstructions />
         )}
       </AppShell.Main>
     </AppShell>

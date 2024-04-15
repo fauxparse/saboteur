@@ -16,7 +16,7 @@ export type Score = {
 export const useScoring = () => {
   const { mission } = useMission();
   const { quiz, questions, correctAnswersForQuestion } = useQuiz();
-  const { agents, saboteur } = useAgents();
+  const { agents } = useAgents();
 
   const [responses, setResponses] = useState<Record<string, Response>>({});
 
@@ -64,8 +64,6 @@ export const useScoring = () => {
     () =>
       agents.reduce((acc: Record<string, Score | null>, agent) => {
         const response = responses[agent.id];
-
-        console.log(response);
 
         if (!response || !response.startsAt || !response.endsAt)
           return { ...acc, [agent.id]: null };

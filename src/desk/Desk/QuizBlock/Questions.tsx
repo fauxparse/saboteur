@@ -1,9 +1,9 @@
-import { useQuiz } from '@/contexts/QuizProvider';
-import { DEFAULT_QUESTIONS, Question } from '@/types/Question';
-import { Accordion, Button, Group, Stack } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
-import { useCallback, useState } from 'react';
-import QuestionEditor from './QuestionEditor';
+import { useQuiz } from "@/contexts/QuizProvider";
+import { DEFAULT_QUESTIONS, Question } from "@/types/Question";
+import { Accordion, Button, Group, Stack } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
+import { useCallback, useState } from "react";
+import QuestionEditor from "./QuestionEditor";
 import {
   DndContext,
   closestCenter,
@@ -12,24 +12,25 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { QuestionProvider } from '@/contexts/QuestionProvider';
+} from "@dnd-kit/sortable";
+import { QuestionProvider } from "@/contexts/QuestionProvider";
 
 export const Questions: React.FC = () => {
   const [openQuestion, setOpenQuestion] = useState<string | null>(null);
 
-  const { quiz, questions, addQuestion, reorderQuestions, startQuiz, endQuiz } = useQuiz();
+  const { quiz, questions, addQuestion, reorderQuestions, startQuiz, endQuiz } =
+    useQuiz();
 
   const addNextQuestion = useCallback(async () => {
     const type = (Object.keys(DEFAULT_QUESTIONS).find(
       (key) => !questions.some((question) => question.type === key)
-    ) || 'custom') as Question['type'];
+    ) || "custom") as Question["type"];
     await addQuestion(type);
   }, [questions, addQuestion]);
 
@@ -54,15 +55,22 @@ export const Questions: React.FC = () => {
   );
 
   return (
-    <Stack>
-      <Accordion chevronPosition="left" value={openQuestion} onChange={setOpenQuestion}>
+    <Stack mt="-0.75rem">
+      <Accordion
+        chevronPosition="left"
+        value={openQuestion}
+        onChange={setOpenQuestion}
+      >
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={() => setOpenQuestion(null)}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={questions} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={questions}
+            strategy={verticalListSortingStrategy}
+          >
             {questions.map((question) => (
               <QuestionProvider key={question.id} question={question}>
                 <QuestionEditor />
@@ -71,7 +79,7 @@ export const Questions: React.FC = () => {
           </SortableContext>
         </DndContext>
       </Accordion>
-      <Group>
+      <Group justify="space-between">
         <Button leftSection={<IconPlus />} onClick={addNextQuestion}>
           Add question
         </Button>

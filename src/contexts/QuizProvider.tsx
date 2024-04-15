@@ -1,4 +1,4 @@
-import { db } from '@/firebase';
+import { db, realtime } from '@/firebase';
 import { EventFirebaseSchema, EventSchema, Quiz } from '@/types/Event';
 import {
   onSnapshot,
@@ -17,6 +17,8 @@ import { useMission } from './MissionProvider';
 import { DEFAULT_QUESTIONS, Question, parseQuestion } from '@/types/Question';
 import { sortBy } from 'lodash-es';
 import { PartialWithId } from '@/types';
+import { useAgents } from './AgentsProvider';
+import { ref, set } from 'firebase/database';
 
 type QuizProviderProps = {
   quiz: Quiz;
@@ -41,6 +43,8 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
   children,
 }) => {
   const { mission } = useMission();
+
+  const { agents } = useAgents();
 
   const [quiz, setQuiz] = useState(initial);
 
@@ -115,7 +119,11 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
 
   const startQuiz = useCallback(async () => {
     await updateQuiz({ id: quiz.id, startsAt: quiz.startsAt || new Date(), endsAt: null });
-  }, [updateQuiz, quiz.id, quiz.startsAt]);
+    await set(
+      ref(realtime, `quizzes/${quiz.id}`),
+      agents.reduce((acc, agent) => ({ ...acc, [agent.id]: 0 }), {})
+    );
+  }, [updateQuiz, quiz.id, quiz.startsAt, agents]);
 
   const endQuiz = useCallback(async () => {
     await updateQuiz({ id: quiz.id, endsAt: new Date() });

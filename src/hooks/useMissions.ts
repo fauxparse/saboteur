@@ -77,6 +77,8 @@ export const useMissions = () => {
     };
 
     await setDoc(doc(db, 'missions', mission.id), omit(mission, ['id', 'agents']));
+
+    return mission;
   }, []);
 
   const updateMission = useCallback(async (mission: PartialWithId<Mission>) => {

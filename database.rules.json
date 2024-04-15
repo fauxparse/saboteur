@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "quizzes": {
+      "$id": {
+        ".write": true,
+        ".read": "auth != null"
+      }
+    }
+  }
+}

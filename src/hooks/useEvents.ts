@@ -1,6 +1,7 @@
 import { db } from '@/firebase';
 import { Mission, PartialWithId } from '@/types';
 import { Event, EventFirebaseSchema, EventSchema } from '@/types/Event';
+import { DEFAULT_QUESTIONS, Question } from '@/types/Question';
 import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -9,13 +10,13 @@ export const useEvents = (mission: Mission) => {
 
   const [events, setEvents] = useState<Event[]>([]);
 
-  useEffect(() => {
-    console.log('boop');
-    const unsubscribe = onSnapshot(ref, (snapshot) => {
-      setEvents(snapshot.docs.map((doc) => EventSchema.parse({ id: doc.id, ...doc.data() })));
-    });
-    return unsubscribe;
-  }, [ref]);
+  useEffect(
+    () =>
+      onSnapshot(ref, (snapshot) =>
+        setEvents(snapshot.docs.map((doc) => EventSchema.parse({ id: doc.id, ...doc.data() })))
+      ),
+    [ref]
+  );
 
   const createQuiz = useCallback(async () => {
     const doc = await addDoc(
@@ -28,7 +29,22 @@ export const useEvents = (mission: Mission) => {
       })
     );
 
-    console.log(doc.id);
+    const questionsRef = collection(ref, doc.id, 'questions');
+
+    const addQuestion = async (type: Question['type'], position: number) => {
+      const multiple = type === 'scenes';
+      const data = {
+        type,
+        multiple,
+        label: DEFAULT_QUESTIONS[type],
+        position,
+      };
+      await addDoc(questionsRef, data);
+    };
+
+    await addQuestion('scenes', 0);
+    await addQuestion('suspicional', 1);
+    await addQuestion('accusation', 2);
   }, [ref]);
 
   const createScene = useCallback(async () => {
