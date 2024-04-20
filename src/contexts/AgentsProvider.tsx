@@ -2,7 +2,15 @@ import { Agent, AgentFirebaseSchema, COLORS, parseAgent } from '@/types/Agent';
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 import { createContext, useContextSelector } from 'use-context-selector';
 import { useMission } from './MissionProvider';
-import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import {
+  DocumentReference,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from 'firebase/firestore';
 import { sortBy } from 'lodash-es';
 import { db } from '@/firebase';
 import { PartialWithId } from '@/types';
@@ -13,7 +21,7 @@ const Context = createContext<{
   agents: Agent[];
   saboteur: Agent | null;
   getAgent: (id: string) => Agent | null;
-  createAgent: (agent: Partial<Agent>) => void;
+  createAgent: (agent: Partial<Agent>) => Promise<DocumentReference>;
   updateAgent: (agent: PartialWithId<Agent>) => void;
   deleteAgent: (agent: Agent) => void;
   eliminateAgent: (agent: Agent) => void;
@@ -21,7 +29,7 @@ const Context = createContext<{
   agents: [],
   saboteur: null,
   getAgent: () => null,
-  createAgent: () => void 0,
+  createAgent: () => Promise.resolve({} as DocumentReference),
   updateAgent: () => void 0,
   deleteAgent: () => void 0,
   eliminateAgent: () => void 0,
@@ -47,9 +55,15 @@ export const AgentsProvider: React.FC<AgentsProviderProps> = ({ children }) => {
   const getAgent = useCallback((id: string) => map.get(id) || null, [map]);
 
   const createAgent = useCallback(
-    async ({ name, color }: Partial<Agent>) => {
+    async ({ name, color, image }: Partial<Agent>) => {
       const defaultColor = sortBy(COLORS, (c) => agents.filter((a) => a.color === c).length)[0];
-      await addDoc(ref, { name, color: color || defaultColor, position: agents.length });
+      const doc = await addDoc(ref, {
+        name,
+        color: color || defaultColor,
+        position: agents.length,
+        image,
+      });
+      return doc;
     },
     [ref, agents]
   );

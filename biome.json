@@ -29,6 +29,9 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "useAltText": "off"
+      },
       "style": {
         "useImportType": "off"
       },

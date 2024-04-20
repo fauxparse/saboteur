@@ -1,7 +1,19 @@
-import { DocumentSnapshot, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
-import { z } from 'zod';
+import {
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+  Timestamp,
+} from "firebase/firestore";
+import { z } from "zod";
 
-export const COLORS = ['red', 'blue', 'lime', 'orange', 'grape', 'teal', 'yellow'] as const;
+export const COLORS = [
+  "red",
+  "blue",
+  "lime",
+  "orange",
+  "grape",
+  "teal",
+  "yellow",
+] as const;
 
 export type Color = (typeof COLORS)[number];
 
@@ -16,10 +28,12 @@ export const AgentSchema = z.object({
     .nullable()
     .optional()
     .transform((t) => t?.toDate() ?? null),
+  image: z.string().nullable(),
 });
 
-export const parseAgent = (doc: DocumentSnapshot | QueryDocumentSnapshot): Agent =>
-  AgentSchema.parse({ id: doc.id, ...doc.data() });
+export const parseAgent = (
+  doc: DocumentSnapshot | QueryDocumentSnapshot
+): Agent => AgentSchema.parse({ id: doc.id, ...doc.data() });
 
 export const AgentFirebaseSchema = z.object({
   name: z.string().optional(),
@@ -30,6 +44,7 @@ export const AgentFirebaseSchema = z.object({
     .nullable()
     .optional()
     .transform((t) => (t && Timestamp.fromDate(t)) || null),
+  image: z.string().nullable().optional(),
 });
 
 export type Agent = z.infer<typeof AgentSchema>;
