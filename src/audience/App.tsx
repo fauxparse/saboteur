@@ -1,13 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Timestamp,
-  collectionGroup,
-  doc,
-  getDoc,
-  onSnapshot,
-  query,
-  where,
-} from 'firebase/firestore';
+import { collectionGroup, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { Mission } from '@/types';
 import { parseMission } from '@/hooks/useMissions';
@@ -39,7 +31,6 @@ export const App: React.FC = () => {
           collectionGroup(db, 'events'),
           where('type', '==', 'quiz'),
           where('startsAt', '!=', null),
-          where('startsAt', '<', Timestamp.now()),
           where('endsAt', '==', null)
         ),
         async (snapshot) => {

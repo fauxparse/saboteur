@@ -4,7 +4,7 @@ import { ActionIcon, AppShell, Center, Flex, Title } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { Quiz, parseEvent } from '@/types/Event';
-import { Timestamp, collection, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { QuizProvider } from '@/contexts/QuizProvider';
 import { TakeQuiz } from './TakeQuiz';
@@ -26,7 +26,6 @@ export const App: React.FC = () => {
           collection(db, 'missions', mission.id, 'events'),
           where('type', '==', 'quiz'),
           where('startsAt', '!=', null),
-          where('startsAt', '<', Timestamp.now()),
           where('endsAt', '==', null)
         ),
         (snapshot) => {
