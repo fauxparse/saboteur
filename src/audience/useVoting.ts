@@ -1,7 +1,7 @@
-import { realtime } from '@/firebase';
-import { ref, increment, update } from 'firebase/database';
-import { useCallback, useEffect, useState } from 'react';
-import { z } from 'zod';
+import { realtime } from "@/firebase";
+import { ref, increment, update } from "firebase/database";
+import { useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 
 const VotingSchema = z.array(z.string());
 
@@ -11,7 +11,10 @@ const readLocalStorage = (key: string) => {
 };
 
 const writeLocalStorage = (key: string, value: Set<string>) => {
-  localStorage.setItem(key, JSON.stringify(VotingSchema.parse(Array.from(value))));
+  localStorage.setItem(
+    key,
+    JSON.stringify(VotingSchema.parse(Array.from(value)))
+  );
 };
 
 const useLocalStorageList = (key: string) => {
@@ -19,8 +22,8 @@ const useLocalStorageList = (key: string) => {
 
   useEffect(() => {
     const localStorageUpdated = () => setItems(readLocalStorage(key));
-    addEventListener('storage', localStorageUpdated);
-    return () => removeEventListener('storage', localStorageUpdated);
+    addEventListener("storage", localStorageUpdated);
+    return () => removeEventListener("storage", localStorageUpdated);
   }, [key]);
 
   const add = useCallback(
@@ -37,7 +40,7 @@ const useLocalStorageList = (key: string) => {
 };
 
 export const useVoting = () => {
-  const { items, add } = useLocalStorageList('saboteur.voting');
+  const { items, add } = useLocalStorageList("saboteur.voting");
 
   const voteFor = useCallback(
     (quizId: string, agentId: string) => {
@@ -51,9 +54,10 @@ export const useVoting = () => {
     [items, add]
   );
 
-  console.log(items);
-
-  const canVoteIn = useCallback((quizId: string) => !items.has(quizId), [items]);
+  const canVoteIn = useCallback(
+    (quizId: string) => !items.has(quizId),
+    [items]
+  );
 
   return { voteFor, canVoteIn };
 };

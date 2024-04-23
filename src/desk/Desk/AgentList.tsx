@@ -1,11 +1,13 @@
 import { Button, Stack } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useHotkeys } from '@mantine/hooks';
 import { IconPlus } from '@tabler/icons-react';
 import { AgentInfo } from './AgentInfo';
 import { AgentMenu } from './AgentMenu';
 import { useAgents } from '@/contexts/AgentsProvider';
 import { Agent } from '@/types/Agent';
 import { useCallback } from 'react';
+
+import classes from './Desk.module.css';
 
 export const AgentList: React.FC = () => {
   const { agents, deleteAgent, eliminateAgent, updateAgent } = useAgents();
@@ -19,6 +21,8 @@ export const AgentList: React.FC = () => {
     [updateAgent]
   );
 
+  useHotkeys([['alt+A', newAgentModal.open]]);
+
   return (
     <Stack gap="sm" p="md">
       {agents.map((agent) => (
@@ -31,9 +35,11 @@ export const AgentList: React.FC = () => {
         />
       ))}
       <Button
+        className={classes.actionButton}
         variant="transparent"
         justify="start"
         leftSection={<IconPlus />}
+        rightSection={<span>⌥A</span>}
         onClick={newAgentModal.open}
       >
         Add agent

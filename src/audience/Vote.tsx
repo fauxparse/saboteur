@@ -1,5 +1,6 @@
 import { useAgents } from '@/contexts/AgentsProvider';
-import { Button, Center, Flex, Stack, Text } from '@mantine/core';
+import { Button, Flex, Image, Stack, Text } from '@mantine/core';
+import classes from './audience.module.css';
 
 type VoteProps = {
   quizId: string;
@@ -10,22 +11,29 @@ export const Vote: React.FC<VoteProps> = ({ quizId, onVote }) => {
   const { agents } = useAgents();
 
   return (
-    <Center pos="fixed" inset={0}>
-      <Stack align="center">
-        <Text fz="xl">Who is the Saboteur?</Text>
+    <Stack align="center">
+      <Text fz="1.75rem" fw="bold" c="white">
+        Who is the Saboteur?
+      </Text>
 
-        <Flex wrap="wrap" gap="md" justify="center">
-          {agents.map((agent) => (
-            <Button
-              key={agent.id}
-              disabled={!!agent.eliminatedAt}
-              onClick={() => onVote(quizId, agent.id)}
-            >
+      <Flex wrap="wrap" gap="md" w="100%" justify="center">
+        {agents.map((agent) => (
+          <Button
+            className={classes.voteButton}
+            key={agent.id}
+            pos="relative"
+            p={0}
+            style={{ aspectRatio: 1 }}
+            disabled={!!agent.eliminatedAt}
+            onClick={() => onVote(quizId, agent.id)}
+          >
+            {agent.image && <Image src={agent.image} pos="absolute" inset={0} />}
+            <Text fz="lg" pos="absolute" bottom={0} left={0} right={0} bg="rgba(0, 0, 0, 0.5)">
               {agent.name}
-            </Button>
-          ))}
-        </Flex>
-      </Stack>
-    </Center>
+            </Text>
+          </Button>
+        ))}
+      </Flex>
+    </Stack>
   );
 };

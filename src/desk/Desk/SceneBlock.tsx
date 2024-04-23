@@ -7,6 +7,7 @@ import { useAgents } from '@/contexts/AgentsProvider';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useMission } from '@/contexts/MissionProvider';
+import { KeyboardEvent, useCallback } from 'react';
 
 type SceneBlockProps = {
   event: Scene;
@@ -27,6 +28,15 @@ export const SceneBlock: React.FC<SceneBlockProps> = ({ event: scene, onDelete }
       await updateDoc(doc(db, 'missions', mission.id, 'events', scene.id), value);
     },
   });
+
+  const keyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
+    switch (e.key) {
+      case 'Enter':
+        e.preventDefault();
+        e.currentTarget.blur();
+        break;
+    }
+  }, []);
 
   return (
     <Milestone
@@ -54,6 +64,7 @@ export const SceneBlock: React.FC<SceneBlockProps> = ({ event: scene, onDelete }
               autoFocus
               placeholder="Brief description of the scene"
               value={field.state.value}
+              onKeyDown={keyDown}
               onChange={(e) => field.handleChange(e.currentTarget.value)}
               onBlur={(e) => {
                 field.handleChange(e.currentTarget.value);

@@ -9,32 +9,32 @@ import {
   Stack,
   Title,
   createTheme,
-} from "@mantine/core";
+} from '@mantine/core';
 import {
   IconArrowLeft,
   IconHandFinger,
   IconHelpCircle,
   IconMasksTheater,
-} from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
-import { AgentList } from "./AgentList";
-import { Clock } from "./Clock";
-import { Milestone } from "./Milestone";
-import { useMission } from "@/contexts/MissionProvider";
-import { useAgents } from "@/contexts/AgentsProvider";
-import { useMemo } from "react";
-import { useEvents } from "@/hooks/useEvents";
-import { Elimination } from "@/types/Event";
-import { sortBy } from "lodash-es";
-import { AgentsProvider } from "@/contexts/AgentsProvider";
+} from '@tabler/icons-react';
+import { Link } from '@tanstack/react-router';
+import { AgentList } from './AgentList';
+import { Clock } from './Clock';
+import { Milestone } from './Milestone';
+import { useMission } from '@/contexts/MissionProvider';
+import { useAgents } from '@/contexts/AgentsProvider';
+import { useMemo } from 'react';
+import { useEvents } from '@/hooks/useEvents';
+import { Elimination } from '@/types/Event';
+import { sortBy } from 'lodash-es';
+import { AgentsProvider } from '@/contexts/AgentsProvider';
+import { EventBlock } from './EventBlock';
+import { SaboteurBlock } from './SaboteurBlock';
+import { useDisclosure, useHotkeys } from '@mantine/hooks';
 
-import classes from "./Desk.module.css";
-import { EventBlock } from "./EventBlock";
-import { SaboteurBlock } from "./SaboteurBlock";
-import { useDisclosure } from "@mantine/hooks";
+import classes from './Desk.module.css';
 
 const theme = createTheme({
-  primaryColor: "cyan",
+  primaryColor: 'cyan',
 });
 
 export const App: React.FC = () => {
@@ -42,14 +42,8 @@ export const App: React.FC = () => {
 
   const { agents } = useAgents();
 
-  const {
-    events,
-    createQuiz,
-    createScene,
-    createSuspicional,
-    updateEvent,
-    deleteEvent,
-  } = useEvents(mission);
+  const { events, createQuiz, createScene, createSuspicional, updateEvent, deleteEvent } =
+    useEvents(mission);
 
   const [showSidebar, { toggle: toggleSidebar }] = useDisclosure(false);
 
@@ -60,15 +54,19 @@ export const App: React.FC = () => {
         (a) =>
           ({
             id: a.id,
-            type: "elimination",
+            type: 'elimination',
             timestamp: a.eliminatedAt,
             agentId: a.id,
           }) as Elimination
       );
-    return sortBy([...events, ...eliminations], ({ timestamp }) =>
-      timestamp.valueOf()
-    );
+    return sortBy([...events, ...eliminations], ({ timestamp }) => timestamp.valueOf());
   }, [events, agents]);
+
+  useHotkeys([
+    ['alt+S', createScene],
+    ['alt+Q', createQuiz],
+    ['alt+U', createSuspicional],
+  ]);
 
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
@@ -78,17 +76,13 @@ export const App: React.FC = () => {
           header={{ height: 72 }}
           navbar={{
             width: 300,
-            breakpoint: "sm",
+            breakpoint: 'sm',
             collapsed: { mobile: !showSidebar, desktop: false },
           }}
         >
           <AppShell.Header className={classes.header} p="md">
             <Flex align="center" gap="sm">
-              <Burger
-                opened={showSidebar}
-                onClick={toggleSidebar}
-                hiddenFrom="sm"
-              />
+              <Burger opened={showSidebar} onClick={toggleSidebar} hiddenFrom="sm" />
               <ActionIcon
                 component={Link}
                 to="/desk"
@@ -120,26 +114,32 @@ export const App: React.FC = () => {
             <Divider />
             <Stack gap="md" p="md">
               <Button
-                onClick={createScene}
+                className={classes.actionButton}
                 variant="outline"
                 justify="start"
                 leftSection={<IconMasksTheater />}
+                rightSection={<span>⌥S</span>}
+                onClick={createScene}
               >
                 Add scene
               </Button>
               <Button
-                onClick={createSuspicional}
+                className={classes.actionButton}
                 variant="outline"
                 justify="start"
                 leftSection={<IconHandFinger />}
+                rightSection={<span>⌥U</span>}
+                onClick={createSuspicional}
               >
                 Add suspicional
               </Button>
               <Button
-                onClick={createQuiz}
+                className={classes.actionButton}
                 variant="outline"
                 justify="start"
                 leftSection={<IconHelpCircle />}
+                rightSection={<span>⌥Q</span>}
+                onClick={createQuiz}
               >
                 Add quiz
               </Button>
@@ -147,9 +147,7 @@ export const App: React.FC = () => {
           </AppShell.Navbar>
           <AppShell.Main>
             <div className={classes.grid}>
-              {mission.startsAt && (
-                <Milestone time={mission.startsAt}>Mission start</Milestone>
-              )}
+              {mission.startsAt && <Milestone time={mission.startsAt}>Mission start</Milestone>}
               <SaboteurBlock />
               {allEvents.map((event) => (
                 <EventBlock
@@ -159,9 +157,7 @@ export const App: React.FC = () => {
                   onDelete={deleteEvent}
                 />
               ))}
-              {mission.endsAt && (
-                <Milestone time={mission.endsAt}>Mission end</Milestone>
-              )}
+              {mission.endsAt && <Milestone time={mission.endsAt}>Mission end</Milestone>}
             </div>
           </AppShell.Main>
         </AppShell>

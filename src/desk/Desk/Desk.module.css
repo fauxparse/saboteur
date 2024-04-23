@@ -56,3 +56,15 @@
   font-size: 1rem;
   font-weight: 500;
 }
+
+.actionButton {
+  > span {
+    > span:nth-child(2) {
+      flex: 1;
+    }
+
+    > span:nth-child(3) {
+      opacity: 0.75;
+    }
+  }
+}
