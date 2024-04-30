@@ -4,7 +4,6 @@ import { Box, Button, Stack, Text } from '@mantine/core';
 import { AnimatePresence, MotionConfig, Variants, motion } from 'framer-motion';
 import { PropsWithChildren, forwardRef, useCallback, useState } from 'react';
 import { AskQuestion } from './AskQuestion';
-import { AwaitFurtherInstructions } from './AwaitFurtherInstructions';
 
 const variants: Variants = {
   initial: { opacity: 0, x: '100vw' },
@@ -40,9 +39,7 @@ export const Questions: React.FC = () => {
                   <AskQuestion />
                 </QuestionProvider>
               </Page>
-            ) : response.endsAt ? (
-              <AwaitFurtherInstructions />
-            ) : (
+            ) : response.endsAt ? null : (
               <Page key="end">
                 <Stack>
                   <Text fz="xl">

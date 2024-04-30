@@ -8,7 +8,8 @@ import { AgentName } from '../AgentName';
 import { Score, useScoring } from './useScoring';
 import { addSeconds, intervalToDuration } from 'date-fns';
 import { useVoting } from './useVoting';
-import { sum, values } from 'lodash-es';
+import { orderBy, sum, values } from 'lodash-es';
+import { forwardRef, useMemo } from 'react';
 
 export const ResponseSummary = () => {
   const { quiz } = useQuiz();
@@ -19,6 +20,11 @@ export const ResponseSummary = () => {
 
   const totalVotes = sum(values(votes));
 
+  const sorted = useMemo(
+    () => orderBy(agents, [(agent) => scores[agent.id]?.points ?? -Infinity], ['desc']),
+    [agents, scores]
+  );
+
   return (
     quiz.startsAt && (
       <Milestone icon={<IconMessageCircle />} time={quiz.startsAt}>
@@ -27,7 +33,7 @@ export const ResponseSummary = () => {
           my="0.375rem"
           style={{ gridTemplateColumns: 'auto 1fr auto auto', rowGap: '0.5rem', columnGap: '1rem' }}
         >
-          {agents.map((agent) => (
+          {sorted.map((agent) => (
             <ResponseRow
               key={agent.id}
               agent={agent}
@@ -49,41 +55,44 @@ type ResponseRowProps = {
   total: number;
 };
 
-const ResponseRow: React.FC<ResponseRowProps> = ({ agent, score, votes, total }) => {
-  const percentage = total ? (votes / total) * 100.0 : 0;
-  return (
-    <Box
-      display="grid"
-      style={{ gridColumn: '1 / -1', gridTemplateColumns: 'subgrid', alignItems: 'stretch' }}
-    >
-      <AgentName agent={agent} style={{ justifySelf: 'end' }} />
-      <Progress.Root size="2xl" transitionDuration={200}>
-        <Progress.Section
-          value={percentage}
-          color={agent.color}
-          style={{ justifyContent: 'start' }}
-        >
-          <Progress.Label fw={500} px="sm">{`${votes} (${Math.round(
-            percentage
-          )}%)`}</Progress.Label>
-        </Progress.Section>
-      </Progress.Root>
-      {score ? (
-        <>
-          <Text>
-            {score.points} {score.points !== 1 ? 'points' : 'point'}
-          </Text>
-          <Text>{formatTimeTaken(score.time)}</Text>
-        </>
-      ) : (
-        <>
-          <Text style={{ justifySelf: 'center' }}>⋯</Text>
-          <Text style={{ justifySelf: 'center' }}>⋯</Text>
-        </>
-      )}
-    </Box>
-  );
-};
+const ResponseRow = forwardRef<HTMLDivElement, ResponseRowProps>(
+  ({ agent, score, votes, total }, ref) => {
+    const percentage = total ? (votes / total) * 100.0 : 0;
+    return (
+      <Box
+        ref={ref}
+        display="grid"
+        style={{ gridColumn: '1 / -1', gridTemplateColumns: 'subgrid', alignItems: 'stretch' }}
+      >
+        <AgentName agent={agent} style={{ justifySelf: 'end' }} />
+        <Progress.Root size="2xl" transitionDuration={200}>
+          <Progress.Section
+            value={percentage}
+            color={agent.color}
+            style={{ justifyContent: 'start' }}
+          >
+            <Progress.Label fw={500} px="sm">{`${votes} (${Math.round(
+              percentage
+            )}%)`}</Progress.Label>
+          </Progress.Section>
+        </Progress.Root>
+        {score ? (
+          <>
+            <Text>
+              {score.points} {score.points !== 1 ? 'points' : 'point'}
+            </Text>
+            <Text>{formatTimeTaken(score.time)}</Text>
+          </>
+        ) : (
+          <>
+            <Text style={{ justifySelf: 'center' }}>⋯</Text>
+            <Text style={{ justifySelf: 'center' }}>⋯</Text>
+          </>
+        )}
+      </Box>
+    );
+  }
+);
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
 

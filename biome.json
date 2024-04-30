@@ -33,7 +33,8 @@
         "useAltText": "off"
       },
       "style": {
-        "useImportType": "off"
+        "useImportType": "off",
+        "useNumberNamespace": "off"
       },
       "performance": {
         "noAccumulatingSpread": "off"

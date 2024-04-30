@@ -1,16 +1,16 @@
 import { useAgent } from '@/contexts/AgentProvider';
 import { useMission } from '@/contexts/MissionProvider';
-import { ActionIcon, AppShell, Center, Flex, Title } from '@mantine/core';
+import { ActionIcon, AppShell, Flex, Text, Title } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { Quiz, parseEvent } from '@/types/Event';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/firebase';
-import { QuizProvider } from '@/contexts/QuizProvider';
 import { TakeQuiz } from './TakeQuiz';
-import { AwaitFurtherInstructions } from './AwaitFurtherInstructions';
 
 import classes from './Agent.module.css';
+import { AnimatePresence } from 'framer-motion';
+import { Page } from './Page';
 
 export const App: React.FC = () => {
   const { mission } = useMission();
@@ -59,15 +59,21 @@ export const App: React.FC = () => {
         </Flex>
       </AppShell.Header>
       <AppShell.Main style={{ display: 'grid' }}>
-        {agent.eliminatedAt ? (
-          <Center h="full">You have been eliminated.</Center>
-        ) : quiz ? (
-          <QuizProvider quiz={quiz}>
-            <TakeQuiz />
-          </QuizProvider>
-        ) : (
-          <AwaitFurtherInstructions />
-        )}
+        <AnimatePresence mode="popLayout">
+          {agent.eliminatedAt ? (
+            <Page key="eliminated">
+              <Text fz="xl">You have been eliminated.</Text>
+            </Page>
+          ) : quiz ? (
+            <Page key="quiz">
+              <TakeQuiz quiz={quiz} />
+            </Page>
+          ) : (
+            <Page key="wait">
+              <Text fz="xl">Await further instructions</Text>
+            </Page>
+          )}
+        </AnimatePresence>
       </AppShell.Main>
     </AppShell>
   );

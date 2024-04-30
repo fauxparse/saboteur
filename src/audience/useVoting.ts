@@ -59,5 +59,10 @@ export const useVoting = () => {
     [items]
   );
 
-  return { voteFor, canVoteIn };
+  const alreadyVotedIn = useCallback(
+    (quizId: string) => items.has(quizId),
+    [items]
+  );
+
+  return { voteFor, canVoteIn, alreadyVotedIn };
 };

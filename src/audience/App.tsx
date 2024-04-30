@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { collectionGroup, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { Mission } from '@/types';
 import { parseMission } from '@/hooks/useMissions';
 import { useVoting } from './useVoting';
-import { Box, Image, MantineProvider, createTheme } from '@mantine/core';
+import { Box, Center, Image, MantineProvider, Text, createTheme } from '@mantine/core';
 import redPaper from '../assets/images/redpaper.webp';
 import title from '../assets/images/title.webp';
 import kirsty from '../assets/images/kirsty.webp';
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import { AnimatePresence, HTMLMotionProps, MotionConfig, motion } from 'framer-motion';
 import { AgentsProvider } from '@/contexts/AgentsProvider';
 import { MissionProvider } from '@/contexts/MissionProvider';
 import { Vote } from './Vote';
@@ -22,7 +22,7 @@ export const App: React.FC = () => {
   const [mission, setMission] = useState<Mission | null>(null);
   const [quizId, setQuizId] = useState<string | null>(null);
 
-  const { canVoteIn, voteFor } = useVoting();
+  const { alreadyVotedIn, voteFor } = useVoting();
 
   useEffect(
     () =>
@@ -50,9 +50,9 @@ export const App: React.FC = () => {
     []
   );
 
-  const [b, setB] = useState(false);
+  const voting = mission && quizId;
 
-  const voting = b && mission && quizId && canVoteIn(quizId);
+  const alreadyVoted = voting ? alreadyVotedIn(quizId) : false;
 
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
@@ -66,28 +66,30 @@ export const App: React.FC = () => {
           overflow: 'hidden',
           fontFamily: 'var(--mantine-font-family)',
         }}
-        onClick={() => setB((x) => !x)}
       >
         <MotionConfig>
           <AnimatePresence>
             {voting ? (
-              <motion.div
-                key="quiz"
-                style={{ width: '90vw', maxWidth: '30rem', gridArea: '1 / 1', alignSelf: 'center' }}
-                variants={{
-                  out: { scale: 0, opacity: 0 },
-                  in: { scale: 1, opacity: 1 },
-                }}
-                initial="out"
-                animate="in"
-                exit="out"
-              >
-                <MissionProvider mission={mission}>
-                  <AgentsProvider>
-                    <Vote quizId={quizId} onVote={voteFor} />
-                  </AgentsProvider>
-                </MissionProvider>
-              </motion.div>
+              alreadyVoted ? (
+                <Page key="thanks">
+                  <Center style={{ flexDirection: 'column', gap: '1rem' }}>
+                    <Text fz="xl" ta="center">
+                      Thanks for voting!
+                    </Text>
+                    <Text fz="lg" ta="center">
+                      Please sit back and enjoy the show.
+                    </Text>
+                  </Center>
+                </Page>
+              ) : (
+                <Page key="vote">
+                  <MissionProvider mission={mission}>
+                    <AgentsProvider>
+                      <Vote quizId={quizId} onVote={voteFor} />
+                    </AgentsProvider>
+                  </MissionProvider>
+                </Page>
+              )
             ) : (
               <>
                 <Image
@@ -139,3 +141,25 @@ export const App: React.FC = () => {
     </MantineProvider>
   );
 };
+
+const Page = forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(({ children, ...props }, ref) => (
+  <motion.div
+    ref={ref}
+    style={{
+      width: '90vw',
+      maxWidth: '30rem',
+      gridArea: '1 / 1',
+      alignSelf: 'center',
+    }}
+    variants={{
+      out: { scale: 0, opacity: 0 },
+      in: { scale: 1, opacity: 1 },
+    }}
+    initial="out"
+    animate="in"
+    exit="out"
+    {...props}
+  >
+    {children}
+  </motion.div>
+));
