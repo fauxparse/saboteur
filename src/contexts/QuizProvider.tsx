@@ -10,9 +10,17 @@ import {
   getDoc,
   deleteDoc,
   updateDoc,
+  getDocs,
 } from 'firebase/firestore';
-import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
-import { createContext, useContextSelector } from 'use-context-selector';
+import {
+  PropsWithChildren,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useMission } from './MissionProvider';
 import { DEFAULT_QUESTIONS, Question, parseQuestion } from '@/types/Question';
 import { sortBy } from 'lodash-es';
@@ -32,11 +40,12 @@ type Context = {
   reorderQuestions: (questions: Question[]) => Promise<void>;
   startQuiz: () => Promise<void>;
   endQuiz: () => Promise<void>;
+  duplicateQuiz: () => Promise<void>;
   setCorrectAnswersForQuestion: (questionId: string, correctAnswerIds: string[]) => void;
   correctAnswersForQuestion: (questionId: string) => Set<string>;
 };
 
-const QuizContext = createContext<Context>({} as Context);
+export const QuizContext = createContext<Context>({} as Context);
 
 export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
   quiz: initial,
@@ -129,6 +138,34 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
     await updateQuiz({ id: quiz.id, endsAt: new Date() });
   }, [updateQuiz, quiz.id]);
 
+  const duplicateQuiz = useCallback(async () => {
+    const ref = collection(db, 'missions', mission.id, 'events');
+
+    const doc = await addDoc(
+      ref,
+      EventFirebaseSchema.parse({
+        type: 'quiz',
+        timestamp: new Date(),
+        startsAt: null,
+        endsAt: null,
+      })
+    );
+
+    const questionsRef = collection(ref, doc.id, 'questions');
+
+    for (const question of questions) {
+      const { id, ...data } = question;
+      const q = await addDoc(questionsRef, data);
+      if (question.type === 'custom') {
+        const existingAnswers = await getDocs(collection(ref, quiz.id, 'questions', id, 'answers'));
+        const newAnswers = collection(questionsRef, q.id, 'answers');
+        for (const answer of existingAnswers.docs) {
+          await addDoc(newAnswers, answer.data());
+        }
+      }
+    }
+  }, [mission.id, quiz.id, questions]);
+
   const setCorrectAnswersForQuestion = useCallback(
     (questionId: string, correctAnswerIds: string[]) =>
       setCorrectAnswers((prev) => ({ ...prev, [questionId]: new Set(correctAnswerIds) })),
@@ -149,6 +186,7 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
       reorderQuestions,
       startQuiz,
       endQuiz,
+      duplicateQuiz,
       setCorrectAnswersForQuestion,
       correctAnswersForQuestion,
     }),
@@ -160,6 +198,7 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
       reorderQuestions,
       startQuiz,
       endQuiz,
+      duplicateQuiz,
       setCorrectAnswersForQuestion,
       correctAnswersForQuestion,
     ]
@@ -171,4 +210,4 @@ export const QuizProvider: React.FC<PropsWithChildren<QuizProviderProps>> = ({
 const parseQuiz = (doc: DocumentSnapshot | QueryDocumentSnapshot): Quiz =>
   EventSchema.parse({ id: doc.id, ...doc.data() }) as Quiz;
 
-export const useQuiz = () => useContextSelector(QuizContext, (v) => v);
+export const useQuiz = () => useContext(QuizContext);
