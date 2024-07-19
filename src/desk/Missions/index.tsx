@@ -1,9 +1,12 @@
-import { useMissions } from "@/hooks/useMissions";
-import { Button, Center, List } from "@mantine/core";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { useCallback } from "react";
+import { useMissions } from '@/hooks/useMissions';
+import { Button, Center, List } from '@mantine/core';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { useCallback } from 'react';
+import { nearestCity } from '@/maps';
 
-import classes from "./Missions.module.css";
+import classes from './Missions.module.css';
+
+nearestCity().then(console.log);
 
 export const Missions: React.FC = () => {
   const { missions, createMission } = useMissions();
@@ -12,7 +15,7 @@ export const Missions: React.FC = () => {
 
   const createClicked = useCallback(async () => {
     const mission = await createMission();
-    navigate({ to: "/desk/$missionId", params: { missionId: mission.id } });
+    navigate({ to: '/desk/$missionId', params: { missionId: mission.id } });
   }, [createMission, navigate]);
 
   return (
