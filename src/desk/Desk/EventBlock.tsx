@@ -24,7 +24,7 @@ const Components: ComponentMap = {
 } as const;
 
 export const EventBlock = <T extends Event>({ event, onUpdate, onDelete }: EventBlockProps<T>) => {
-  const Component = Components[event.type] as React.FC<EventBlockProps<T>>;
+  const Component = Components[event.type] as unknown as React.FC<EventBlockProps<T>>;
 
   return <Component event={event} onUpdate={onUpdate} onDelete={onDelete} />;
 };
