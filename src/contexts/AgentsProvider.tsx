@@ -44,7 +44,9 @@ export const AgentsProvider: React.FC<AgentsProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(ref, (snapshot) => {
-      setAgents(sortBy(snapshot.docs.map(parseAgent), 'position'));
+      if (snapshot.docs.length) {
+        setAgents(sortBy(snapshot.docs.map(parseAgent), 'position'));
+      }
     });
 
     return unsubscribe;
