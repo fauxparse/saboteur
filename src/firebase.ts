@@ -16,6 +16,7 @@ export const firebaseConfig = {
   messagingSenderId: '35833465655',
   appId: '1:35833465655:web:f7e6015f41764bbfad28b2',
   measurementId: 'G-5JDPJK83YZ',
+  databaseURL: 'https://thesaboteur-default-rtdb.asia-southeast1.firebasedatabase.app/',
 };
 
 // Initialize Firebase

@@ -22,7 +22,7 @@ export const useVoting = () => {
   const votes = useMemo(
     () =>
       agents.reduce(
-        (acc: Record<string, number>, { id }: Agent) => ({ ...acc, [id]: value[id] ?? 0 }),
+        (acc: Record<string, number>, { id }: Agent) => ({ ...acc, [id]: value?.[id] ?? 0 }),
         {}
       ),
     [value, agents]
