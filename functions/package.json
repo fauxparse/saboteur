@@ -1,0 +1,25 @@
+{
+  "name": "saboteur-functions",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": "22",
+    "pnpm": "9.0.4"
+  },
+  "scripts": {
+    "test": "node --test retention.test.js",
+    "cleanup": "node cleanup-cli.js"
+  },
+  "pnpm": {
+    "overrides": {
+      "qs": "6.16.0"
+    }
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^5.0.5",
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0",
+    "google-auth-library": "^11.3.1"
+  }
+}
