@@ -31,7 +31,11 @@ export const ResponseSummary = () => {
         <Box
           display="grid"
           my="0.375rem"
-          style={{ gridTemplateColumns: 'auto 1fr auto auto', rowGap: '0.5rem', columnGap: '1rem' }}
+          style={{
+            gridTemplateColumns: 'auto minmax(0, 1fr) auto auto auto',
+            rowGap: '0.5rem',
+            columnGap: '1rem',
+          }}
         >
           {sorted.map((agent) => (
             <ResponseRow
@@ -66,16 +70,11 @@ const ResponseRow = forwardRef<HTMLDivElement, ResponseRowProps>(
       >
         <AgentName agent={agent} style={{ justifySelf: 'end' }} />
         <Progress.Root size="2xl" transitionDuration={200}>
-          <Progress.Section
-            value={percentage}
-            color={agent.color}
-            style={{ justifyContent: 'start' }}
-          >
-            <Progress.Label fw={500} px="sm">{`${votes} (${Math.round(
-              percentage
-            )}%)`}</Progress.Label>
-          </Progress.Section>
+          <Progress.Section value={percentage} color={agent.color} />
         </Progress.Root>
+        <Text fw={500} style={{ whiteSpace: 'nowrap', alignSelf: 'center' }}>
+          {`${votes} (${Math.round(percentage)}%)`}
+        </Text>
         {score ? (
           <>
             <Text>
